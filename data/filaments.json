@@ -1,0 +1,16 @@
+{
+  "PLA": [
+    { "shop": "Ozon", "name": "BestFilament PLA 1кг", "link": "https://www.ozon.ru/search/?text=BestFilament+PLA+1%D0%BA%D0%B3" },
+    { "shop": "Я.Маркет", "name": "FDPlast PLA 1кг", "link": "https://market.yandex.ru/search?text=FDPlast+PLA+1%D0%BA%D0%B3" }
+  ],
+  "PETG": [
+    { "shop": "Ozon", "name": "BestFilament PETG 1кг", "link": "https://www.ozon.ru/search/?text=BestFilament+PETG+1%D0%BA%D0%B3" },
+    { "shop": "Я.Маркет", "name": "FDPlast PETG 1кг", "link": "https://market.yandex.ru/search?text=FDPlast+PETG+1%D0%BA%D0%B3" }
+  ],
+  "ABS": [
+    { "shop": "Ozon", "name": "BestFilament ABS 1кг", "link": "https://www.ozon.ru/search/?text=BestFilament+ABS+1%D0%BA%D0%B3" }
+  ],
+  "TPU": [
+    { "shop": "Я.Маркет", "name": "eSUN TPU 1кг", "link": "https://market.yandex.ru/search?text=eSUN+TPU+1%D0%BA%D0%B3" }
+  ]
+}

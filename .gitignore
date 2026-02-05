@@ -1,0 +1,6 @@
+node_modules
+*.log
+*.zip
+__pycache__
+.env
+data/models-index.json
