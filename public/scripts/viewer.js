@@ -1,30 +1,38 @@
 // public/scripts/viewer.js
 
 const modal = document.getElementById('model-modal');
-const closeBtn = document.querySelector('.close-modal');
+const closeBtn = document.querySelector('.modal-close-v2');
 const downloadBtn = document.getElementById('download-btn');
 
-let currentModel = null; // Store current model data
+let currentModel = null;
 
 window.openModelModal = function(model) {
     if (!model) return;
-    currentModel = model; // Save for calculator
+    currentModel = model;
 
     document.getElementById('modal-title').textContent = model.name;
-    document.getElementById('modal-author').querySelector('span').textContent = model.author;
-    document.getElementById('modal-description').textContent = model.description || 'Нет описания';
+    document.getElementById('modal-author').textContent = model.author;
     
     const viewer = document.getElementById('modal-viewer');
+    const fallback = document.getElementById('modal-image-fallback');
     
-    viewer.poster = model.image || 'https://via.placeholder.com/400x300?text=No+Image';
-    viewer.src = '';
+    if (model.stl_url) {
+        viewer.style.display = 'block';
+        fallback.style.display = 'none';
+        viewer.poster = model.image || '';
+        viewer.src = model.stl_url;
+    } else {
+        viewer.style.display = 'none';
+        fallback.style.display = 'block';
+        fallback.src = model.image || '';
+    }
     
     const externalLink = document.getElementById('external-link');
     externalLink.href = model.source_url;
 
-    downloadBtn.setAttribute('data-id', model.objectID);
-
-    renderCalculator(); // Render the calculator UI
+    renderAffiliateLinks(model.name);
+    renderServiceProviders();
+    renderCalculator();
 
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -36,148 +44,125 @@ function closeModal() {
 }
 
 closeBtn.addEventListener('click', closeModal);
+window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-window.addEventListener('click', (event) => {
-    if (event.target === modal) {
-        closeModal();
-    }
+downloadBtn.addEventListener('click', () => {
+    if (!currentModel) return;
+    // Track and redirect to source
+    fetch(`/api/track-click?modelId=${currentModel.objectID}&type=download`);
+    window.open(currentModel.source_url, '_blank');
 });
 
-downloadBtn.addEventListener('click', async () => {
-    const modelId = downloadBtn.getAttribute('data-id');
-    if (!modelId) return;
-
-    // Extract the numeric ID from the objectID (e.g., "thingiverse_12345" -> "12345")
-    const thingId = modelId.split('_')[1];
-    if (!thingId) {
-        console.error('Could not extract thing ID from', modelId);
-        alert('Ошибка при скачивании файла.');
-        return;
-    }
-
-    // Просто перенаправляем на эндпоинт скачивания
-    window.location.href = `/api/download?thing_id=${thingId}`;
+function renderAffiliateLinks(name) {
+    const container = document.getElementById('market-links');
+    const block = document.getElementById('affiliate-block');
     
-    // Track click
-    fetch(`/api/track-click?modelId=${modelId}&type=download`);
-});
+    // decide if we show marketplace links
+    const keywords = ['spring', 'motor', 'gear', 'shaft', 'blade', 'electronics', 'pump', 'switch', 'handle', 'button', 'belt'];
+    const matches = keywords.some(k => name.toLowerCase().includes(k));
 
-// --- CALCULATOR LOGIC ---
-
-const materialDensities = {
-    'PLA': 1.24,
-    'PETG': 1.27,
-    'ABS': 1.04,
-    'TPU': 1.21
-};
-
-function calculateCost() {
-    if (!currentModel || !currentModel.volume_cm3) return;
-
-    const material = document.getElementById('calc-material').value;
-    const spoolPrice = parseFloat(document.getElementById('calc-price').value);
-    const spoolWeight = parseFloat(document.getElementById('calc-weight').value);
-    const infill = parseFloat(document.getElementById('calc-infill').value);
-
-    const resultEl = document.getElementById('calculator-result');
-
-    if (isNaN(spoolPrice) || isNaN(spoolWeight) || isNaN(infill) || spoolWeight <= 0) {
-        resultEl.textContent = 'Заполните все поля корректно.';
-        return;
+    if (matches) {
+        block.style.display = 'block';
+        container.innerHTML = `
+            <a href="https://www.amazon.com/s?k=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+                <span>Amazon</span>
+                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
+            </a>
+            <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+                <span>AliExpress</span>
+                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
+            </a>
+        `;
+    } else {
+        block.style.display = 'none';
     }
-
-    const density = materialDensities[material];
-    const modelWeight = currentModel.volume_cm3 * (infill / 100) * density;
-    const totalWeight = modelWeight * 1.15; // +15% for supports/raft/purge
-    const pricePerGram = spoolPrice / spoolWeight;
-    const estimatedCost = totalWeight * pricePerGram;
-
-    resultEl.innerHTML = `Примерный вес: <strong>${totalWeight.toFixed(1)} г</strong><br>Примерная стоимость: <strong>${estimatedCost.toFixed(2)} ₽</strong>`;
-    
-    renderMaterialLinks(material); // Render links for the selected material
 }
 
-async function renderMaterialLinks(material) {
-    const linksContainer = document.getElementById('material-links-section');
-    linksContainer.innerHTML = '<h5>Где купить:</h5>';
+function calculateCost(volume = 50, density = 1.24, infill = 0.2) {
+    const weight = volume * density * (infill + 0.1); // +10% for supports
+    const cost = Math.max(150, weight * 15); // Min price 150 rub, 15 rub per gram
+    return { weight, cost };
+}
+
+async function renderServiceProviders() {
+    const container = document.getElementById('master-suggestion');
+    container.innerHTML = '<p>Загрузка мастеров...</p>';
 
     try {
-        const response = await fetch('/data/filaments.json');
-        const filaments = await response.json();
-        const links = filaments[material];
+        const response = await fetch('/data/masters.json');
+        const data = await response.json();
 
-        if (links && links.length > 0) {
-            const list = document.createElement('ul');
-            list.className = 'material-links-list';
-            links.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="${item.link}" target="_blank" rel="noopener sponsored">${item.name} на <strong>${item.shop}</strong></a>`;
-                list.appendChild(li);
+        // Use geolocation if possible
+        let masters = data.masters;
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const { latitude, longitude } = pos.coords;
+                // Simple sort by distance (approximate)
+                masters.sort((a, b) => {
+                    const distA = Math.hypot(a.lat - latitude, a.lng - longitude);
+                    const distB = Math.hypot(b.lat - latitude, b.lng - longitude);
+                    return distA - distB;
+                });
+                renderMastersList(container, masters.slice(0, 2));
+            }, () => {
+                renderMastersList(container, masters.slice(0, 2));
             });
-            linksContainer.appendChild(list);
         } else {
-            linksContainer.innerHTML += '<p>Ссылки для этого материала не найдены.</p>';
+            renderMastersList(container, masters.slice(0, 2));
         }
     } catch (error) {
-        console.error('Error fetching filament links:', error);
-        linksContainer.innerHTML += '<p>Не удалось загрузить ссылки.</p>';
+        container.innerHTML = '<p>Мастера временно недоступны.</p>';
     }
+}
+
+function renderMastersList(container, masters) {
+    const { cost } = calculateCost(currentModel.volume_cm3 || 50);
+
+    container.innerHTML = masters.map(master => `
+        <div class="master-suggestion-card">
+            <div class="master-info">
+                <h5>${master.name}</h5>
+                <p>📍 ${master.city} • <span style="color:var(--accent)">~${Math.round(cost)} ₽</span></p>
+            </div>
+            <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Привет! Хочу заказать 3D-печать модели: ' + currentModel.name + '. Ориентировочная цена: ' + Math.round(cost) + 'р')}"
+               target="_blank" class="btn-accent" style="padding: 10px 20px; font-size:0.875rem;">
+               Заказать
+            </a>
+        </div>
+    `).join('');
 }
 
 function renderCalculator() {
-    const controlsContainer = document.getElementById('calculator-controls');
-    const resultEl = document.getElementById('calculator-result');
-    const calculatorSection = document.getElementById('calculator-section');
-
-    if (!currentModel || !currentModel.volume_cm3) {
-        calculatorSection.style.display = 'none';
-        return;
-    }
+    const container = document.getElementById('calc-ui');
+    const result = document.getElementById('calc-result-v2');
     
-    calculatorSection.style.display = 'block';
+    const volume = currentModel.volume_cm3 || 50;
 
-    controlsContainer.innerHTML = `
-        <div class="calc-row">
-            <div class="calc-group">
-                <label for="calc-material">Пластик:</label>
-                <select id="calc-material">
-                    ${Object.keys(materialDensities).map(m => `<option value="${m}">${m}</option>`).join('')}
-                </select>
-            </div>
-            <div class="calc-group">
-                <label for="calc-infill">Заполнение:</label>
-                <input type="number" id="calc-infill" value="20" min="5" max="100" step="5">
-                <span>%</span>
-            </div>
+    container.innerHTML = `
+        <div class="calc-field">
+            <label>Материал</label>
+            <select id="calc-mat-v2">
+                <option value="1.24">PLA (Стандарт)</option>
+                <option value="1.27">PETG (Прочный)</option>
+                <option value="1.04">ABS (Технический)</option>
+            </select>
         </div>
-        <div class="calc-row">
-            <div class="calc-group">
-                <label for="calc-price">Цена катушки:</label>
-                <input type="number" id="calc-price" value="1500" step="50">
-                <span>₽</span>
-            </div>
-            <div class="calc-group">
-                <label for="calc-weight">Вес катушки:</label>
-                <input type="number" id="calc-weight" value="1000" step="250">
-                <span>г</span>
-            </div>
+        <div class="calc-field">
+            <label>Заполнение (%)</label>
+            <input type="number" id="calc-inf-v2" value="20" min="10" max="100" step="10">
         </div>
     `;
 
-    resultEl.innerHTML = ''; // Clear previous results
+    const calculate = () => {
+        const density = parseFloat(document.getElementById('calc-mat-v2').value);
+        const infill = parseInt(document.getElementById('calc-inf-v2').value) / 100;
 
-    // Add event listeners
-    const materialSelector = document.getElementById('calc-material');
-    materialSelector.addEventListener('change', () => {
-        calculateCost();
-        renderMaterialLinks(materialSelector.value);
-    });
-    document.getElementById('calc-infill').addEventListener('input', calculateCost);
-    document.getElementById('calc-price').addEventListener('input', calculateCost);
-    document.getElementById('calc-weight').addEventListener('input', calculateCost);
+        const { weight, cost } = calculateCost(volume, density, infill);
 
-    // Initial calculation and link rendering
-    calculateCost();
-    renderMaterialLinks(materialSelector.value);
+        result.innerHTML = `Вес: ~${weight.toFixed(1)} г | Цена: ~${Math.round(cost)} ₽`;
+    };
+
+    document.getElementById('calc-mat-v2').addEventListener('change', calculate);
+    document.getElementById('calc-inf-v2').addEventListener('input', calculate);
+    calculate();
 }
-

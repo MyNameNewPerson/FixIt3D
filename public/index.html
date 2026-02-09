@@ -3,115 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FixIt3D | Платформа по ремонту и 3D-печати</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="referrer" content="no-referrer">
+    <title>FixIt3D | 3D модели для ремонта и хобби</title>
+    <meta name="description" content="Крупнейшая база 3D-моделей для ремонта техники и хобби. Скачайте STL или закажите печать у лучших мастеров вашего города.">
+    <meta name="keywords" content="3D печать, ремонт техники, запчасти, Bosch, Dyson, Ikea, фигурки, моделизм, STL">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="FixIt3D - Продлите жизнь вашим вещам">
+    <meta property="og:description" content="Поиск и заказ 3D-печати запчастей и моделей для хобби.">
+    <meta property="og:type" content="website">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/styles/main.css">
-    <!-- 3D Model Viewer Library -->
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "FixIt3D",
+      "url": "https://fixit3d.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://fixit3d.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 </head>
 <body>
     <header>
         <nav class="container">
-            <div class="logo">
-                <span class="logo-icon">🔧</span>
+            <a href="/" class="logo">
+                <span class="logo-icon">🛠️</span>
                 <span class="logo-text">FixIt3D</span>
-            </div>
-            <div class="nav-links">
-                <a href="#models">Модели</a>
-                <a href="#map-section">Мастерские</a>
-                <a href="/legal/dmca.html">Правообладателям</a>
+            </a>
+
+            <div class="nav-actions">
+                <div class="mode-toggle-container">
+                    <button id="mode-spare-parts" class="mode-toggle-btn active" data-mode="spare-parts">Запчасти</button>
+                    <button id="mode-hobby" class="mode-toggle-btn" data-mode="hobby">Хобби</button>
+                </div>
+                <div class="nav-links">
+                    <a href="#map-section">Мастерские</a>
+                    <a href="#models">Модели</a>
+                </div>
             </div>
         </nav>
     </header>
 
     <main>
-        <section class="hero">
+        <section class="hero-v2">
             <div class="container">
-                <h1>Найдите запчасть и вдохните жизнь в свои вещи</h1>
-                <p>База из 500+ проверенных 3D-моделей для ремонта бытовой техники и электроники.</p>
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Например: Bosch, Dyson, шестерня...">
-                    <button id="search-btn" class="btn-primary">Найти</button>
+                <div class="hero-content">
+                    <h1 id="hero-title">Верните технику к жизни с помощью 3D-печати</h1>
+                    <p id="hero-subtitle">Более 3000 проверенных моделей для ремонта и вашего творчества.</p>
+                    <div class="search-container">
+                        <div class="search-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="search-input" placeholder="Что вы ищете? (например: Bosch шестерня)">
+                            <button id="search-btn" class="btn-accent">Найти</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section id="models" class="models-section container">
-            <div class="section-header">
-                <h2>Популярные запчасти</h2>
-                <div class="filters">
-                    <button class="filter-btn active" data-brand="">Все</button>
-                    <button class="filter-btn" data-brand="Bosch">Bosch</button>
-                    <button class="filter-btn" data-brand="Dyson">Dyson</button>
-                    <button class="filter-btn" data-brand="Ikea">Ikea</button>
+        <section id="map-section" class="map-section-v2">
+            <div class="container">
+                <div class="section-info">
+                    <h2>Найдите мастера рядом</h2>
+                    <p>Если у вас нет своего 3D-принтера, профессионалы напечатают деталь за вас.</p>
                 </div>
+                <div id="map" class="map-v2"></div>
             </div>
-            <div id="models-grid" class="models-grid">
-                <!-- Модели будут здесь -->
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-            </div>
-            <div id="pagination-container" class="pagination-container"></div>
         </section>
 
-        <section id="map-section" class="map-section">
+        <section id="models" class="models-section-v2">
             <div class="container">
-                <h2>Найдите мастера 3D-печати рядом</h2>
-                <p>Если у вас нет принтера, наши партнеры помогут напечатать деталь.</p>
-                <div id="map" class="map-container"></div>
+                <div class="filters-bar">
+                    <h2 id="results-count">Популярные запчасти</h2>
+                    <div class="filters-scroll" id="brand-filters">
+                        <button class="filter-chip active" data-brand="">Все бренды</button>
+                    </div>
+                </div>
+
+                <div id="models-grid" class="models-grid-v2">
+                    <!-- Cards will be injected here -->
+                    <div class="skeleton-v2"></div>
+                    <div class="skeleton-v2"></div>
+                    <div class="skeleton-v2"></div>
+                    <div class="skeleton-v2"></div>
+                </div>
+
+                <div id="pagination-container" class="pagination-v2"></div>
             </div>
         </section>
     </main>
 
-    <footer>
+    <footer class="footer-v2">
         <div class="container">
-            <div class="footer-grid">
+            <div class="footer-content">
                 <div class="footer-brand">
                     <h3>FixIt3D</h3>
-                    <p>Продлеваем жизнь вещам через технологии.</p>
+                    <p>Платформа для тех, кто чинит, а не выбрасывает.</p>
                 </div>
-                <div class="footer-links">
-                    <h4>Документы</h4>
-                    <a href="/legal/terms.html">Условия использования</a>
-                    <a href="/legal/privacy.html">Конфиденциальность</a>
-                    <a href="/legal/dmca.html">DMCA</a>
-                </div>
-                <div class="footer-social">
-                    <h4>Контакты</h4>
-                    <p>support@fixit3d.com</p>
+                <div class="footer-links-grid">
+                    <div>
+                        <h4>Навигация</h4>
+                        <a href="#models">Модели</a>
+                        <a href="#map-section">Карта мастеров</a>
+                    </div>
+                    <div>
+                        <h4>Помощь</h4>
+                        <a href="/legal/dmca.html">Правообладателям</a>
+                        <a href="/legal/terms.html">Условия</a>
+                    </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 FixIt3D. Все права защищены.</p>
+                <p>&copy; 2024 FixIt3D. Сделано с ❤️ для мейкеров.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Modal for Model Viewer -->
-    <div id="model-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="modal-body">
-                <div id="viewer-container" class="viewer-container">
-                    <model-viewer id="modal-viewer" src="" alt="3D модель" ar ar-modes="webxr scene-viewer quick-look" camera-controls shadow-intensity="1" style="width: 100%; height: 400px;"></model-viewer>
+    <!-- Advanced Modal -->
+    <div id="model-modal" class="modal-v2">
+        <div class="modal-card-v2">
+            <button class="modal-close-v2">&times;</button>
+            <div class="modal-grid-v2">
+                <div class="modal-visuals">
+                    <model-viewer id="modal-viewer" camera-controls shadow-intensity="1" ar ar-modes="webxr scene-viewer quick-look"></model-viewer>
+                    <img id="modal-image-fallback" style="display:none; width:100%; height:100%; object-fit:contain;" referrerpolicy="no-referrer">
                 </div>
-                <div class="model-info">
-                    <h2 id="modal-title">Название модели</h2>
-                    <p id="modal-author">Автор: <span></span></p>
-                    <p id="modal-description">Описание...</p>
-                    
-                    <div id="calculator-section" class="calculator-section">
-                        <h4>Калькулятор стоимости</h4>
-                        <div id="calculator-controls"></div>
-                        <p id="calculator-result"></p>
-                        <div id="material-links-section"></div>
+                <div class="modal-details">
+                    <div class="modal-header-v2">
+                        <h2 id="modal-title">Название модели</h2>
+                        <p class="modal-meta">Автор: <span id="modal-author"></span></p>
                     </div>
 
-                    <div class="modal-actions">
-                        <button id="download-btn" class="btn-primary">Скачать STL (ZIP)</button>
-                        <a id="external-link" href="#" target="_blank" class="btn-secondary">На оригинал</a>
+                    <div id="affiliate-block" class="modal-section-v2">
+                        <h4>🛒 Купить готовую деталь</h4>
+                        <div id="market-links" class="market-buttons"></div>
+                    </div>
+
+                    <div id="service-block" class="modal-section-v2">
+                        <h4>🛠️ Заказать 3D-печать</h4>
+                        <div id="master-suggestion"></div>
+                    </div>
+
+                    <div id="calc-block" class="modal-section-v2">
+                        <h4>🧮 Калькулятор стоимости</h4>
+                        <div id="calc-ui" class="calc-grid-v2"></div>
+                        <div id="calc-result-v2" class="calc-result"></div>
+                    </div>
+
+                    <div class="modal-footer-v2">
+                        <button id="download-btn" class="btn-primary-v2">Скачать STL</button>
+                        <a id="external-link" href="#" target="_blank" class="btn-outline-v2">Источник</a>
                     </div>
                 </div>
             </div>

@@ -1,1 +1,0 @@
-{ "query": "{ prints(limit: 1) { id } }" }
