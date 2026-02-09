@@ -11,8 +11,11 @@ APP_TOKEN = "53dba3cff3fbbf0506e34d7fa855f40e"
 
 THINGIVERSE_API = 'https://api.thingiverse.com'
 
-# Структура: 'Категория': ['поисковый запрос 1', 'запрос 2', ...]
-SEARCH_CATEGORIES = {
+# Keywords to filter out jokes and irrelevant content
+JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody"]
+
+# Search queries for Spare Parts
+SPARE_PARTS_QUERIES = {
     'Bosch': ['Bosch+spare+part', 'Bosch+repair'],
     'Dyson': ['Dyson+spare+part', 'Dyson+repair'],
     'Ikea': ['Ikea+spare+part', 'Ikea+repair'],
@@ -22,52 +25,80 @@ SEARCH_CATEGORIES = {
     'Philips': ['Philips+spare+part', 'Philips+repair'],
     'Braun': ['Braun+spare+part', 'Braun+repair'],
     'Miele': ['Miele+spare+part', 'Miele+repair'],
-    'General Parts': ['spare+part', 'repair', 'replacement+part', 'fix']
+    'Xiaomi': ['Xiaomi+spare+part', 'Xiaomi+repair'],
+    'Electrolux': ['Electrolux+spare+part', 'Electrolux+repair'],
+    'Indesit': ['Indesit+spare+part', 'Indesit+repair'],
+    'Kenwood': ['Kenwood+spare+part', 'Kenwood+repair'],
+    'Moulinex': ['Moulinex+spare+part', 'Moulinex+repair'],
+    'General Parts': ['spare+part', 'repair', 'replacement+part', 'fix', 'gears', 'knob']
 }
 
-def parse_thingiverse():
-    """
-    Ищет на Thingiverse модели по категориям и сохраняет их.
-    """
-    all_models = {}  # Используем словарь для автоматического удаления дубликатов по ID
-    
-    headers = {
-        'Authorization': f'Bearer {APP_TOKEN}'
-    }
-    
-    for category, terms in SEARCH_CATEGORIES.items():
+# Search queries for Hobby
+HOBBY_QUERIES = {
+    'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain'],
+    'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars', 'cosplay'],
+    'Toys': ['toy', 'puzzle', 'action+figure'],
+    'Home': ['decoration', 'vase', 'art', 'jewelry']
+}
+
+def is_joke(name, description):
+    text = (name + " " + (description or "")).lower()
+    for word in JOKE_KEYWORDS:
+        if word in text:
+            return True
+    return False
+
+def fetch_results(queries, mode, headers):
+    models = {}
+    for category, terms in queries.items():
         for term in terms:
-            print(f"Ищем в категории '{category}' по запросу: '{term}'...")
-            
-            for page in range(1, 6): # Fetch 5 pages
-                print(f"  - Загружаем страницу {page}...")
-                url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=40&page={page}'
-                
+            print(f"[{mode}] Searching '{category}' for: '{term}'...")
+            for page in range(1, 3): # Reduced to 2 pages per term for speed
+                url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=30&page={page}'
                 try:
                     response = requests.get(url, headers=headers)
                     response.raise_for_status()
                     data = response.json()
-                except requests.exceptions.RequestException as e:
-                    print(f"  - Ошибка при запросе: {e}")
-                    break 
-
-                if not data.get('hits'):
-                    print("  - На этой странице моделей нет, завершаем.")
+                except Exception as e:
+                    print(f"  - Error: {e}")
                     break
 
-                for item in data.get('hits', []):
+                hits = data.get('hits', [])
+                if not hits:
+                    break
+
+                for item in hits:
                     if not item.get('preview_image'):
                         continue
                     
+                    if is_joke(item['name'], item.get('description')):
+                        continue
+
+                    # If mode is spare-parts and category is a brand, verify brand is in name
+                    brand = None
+                    if mode == 'spare-parts' and category != 'General Parts':
+                        if category.lower() in item['name'].lower():
+                            brand = category
+                        else:
+                            # It might still be a spare part, but not for this brand
+                            # Let's check other brands
+                            for b in SPARE_PARTS_QUERIES.keys():
+                                if b != 'General Parts' and b.lower() in item['name'].lower():
+                                    brand = b
+                                    break
+                            # If no brand matches, we categorize it as General Parts or skip if we want strictness
+                            if not brand:
+                                continue # Skip if brand doesn't match for brand-specific searches
+
                     model_id = f"thingiverse_{item['id']}"
-                    
-                    if model_id not in all_models:
-                        all_models[model_id] = {
+                    if model_id not in models:
+                        models[model_id] = {
                             'objectID': model_id,
                             'name': item['name'],
                             'description': item.get('description', ''),
-                            'brand': category if category != 'General Parts' else None,
+                            'brand': brand,
                             'category': category,
+                            'mode': mode,
                             'source': 'thingiverse',
                             'source_url': item['public_url'],
                             'license': item.get('license'),
@@ -79,15 +110,24 @@ def parse_thingiverse():
                             'volume_cm3': None,
                             'indexed_at': datetime.now().isoformat()
                         }
+    return models
 
+def parse_thingiverse():
+    headers = {'Authorization': f'Bearer {APP_TOKEN}'}
+
+    spare_parts = fetch_results(SPARE_PARTS_QUERIES, 'spare-parts', headers)
+    hobby_parts = fetch_results(HOBBY_QUERIES, 'hobby', headers)
+
+    all_models = {**spare_parts, **hobby_parts}
     models_list = list(all_models.values())
     
     output_path = 'data/models-index.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(models_list, f, ensure_ascii=False, indent=2)
 
-    print(f"Найдено и сохранено {len(models_list)} уникальных моделей в {output_path}")
+    print(f"Saved {len(models_list)} total models to {output_path}")
 
 if __name__ == '__main__':
     parse_thingiverse()
