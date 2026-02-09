@@ -2,7 +2,10 @@
 import fs from 'fs';
 import path from 'path';
 
-const BLACKLIST_WORDS = ['joke', 'meme', 'funny', 'gag', 'prank', 'fake', 'parody', 'shit', 'dumb', 'stupid'];
+const BLACKLIST_WORDS = [
+  'joke', 'meme', 'funny', 'gag', 'prank', 'fake', 'parody', 'shit', 'dumb', 'stupid',
+  'keychain', 'logo', 'decoration', 'figurine', 'statue', 'ornament', 'fan art'
+];
 
 export default async function handler(req, res) {
   const { q = '', brand = '', mode = 'spare-parts', page = 1, per_page = 20 } = req.query;
@@ -16,22 +19,30 @@ export default async function handler(req, res) {
     const fileData = fs.readFileSync(dataPath, 'utf8');
     let allHits = JSON.parse(fileData);
 
-    // Initial filter by mode
+    // Filter by mode
     let filteredHits = allHits.filter(h => h.mode === mode);
 
-    // Hard filter out blacklist words from names
-    filteredHits = filteredHits.filter(h => {
-      const name = h.name.toLowerCase();
-      return !BLACKLIST_WORDS.some(word => name.includes(word));
-    });
-
-    // If spare-parts mode and brand is specified, be strict
-    if (mode === 'spare-parts' && brand) {
+    // Apply Blacklist for SPARE PARTS specifically
+    if (mode === 'spare-parts') {
       filteredHits = filteredHits.filter(h => {
-        const name = h.name.toLowerCase();
+        const text = (h.name + ' ' + (h.description || '')).toLowerCase();
+        return !BLACKLIST_WORDS.some(word => text.includes(word));
+      });
+
+      // Also ensure functional keywords if brand is mentioned
+      if (brand) {
         const brandL = brand.toLowerCase();
-        // Either the brand is explicitly set in metadata OR it's in the name
-        return h.brand === brand || name.includes(brandL);
+        filteredHits = filteredHits.filter(h => {
+           const name = h.name.toLowerCase();
+           return h.brand === brand || name.includes(brandL);
+        });
+      }
+    } else {
+      // For Hobby, maybe less strict, but still avoid "shit/dumb" etc.
+      const toxicWords = ['shit', 'dumb', 'stupid', 'fake'];
+      filteredHits = filteredHits.filter(h => {
+        const text = h.name.toLowerCase();
+        return !toxicWords.some(word => text.includes(word));
       });
     }
 
@@ -46,7 +57,7 @@ export default async function handler(req, res) {
       );
     }
 
-    // Brand filter (if not already handled by strict brand filter)
+    // Generic brand filter (for chips)
     if (brand && mode !== 'spare-parts') {
       filteredHits = filteredHits.filter(h => h.brand === brand || h.category === brand);
     }

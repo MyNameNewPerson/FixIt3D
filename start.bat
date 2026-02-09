@@ -1,38 +1,48 @@
 @echo off
-setlocal
-echo ===================================================
-echo   FixIt3D - Jules Version Launcher
-echo ===================================================
+setlocal enabledelayedexpansion
+title FixIt3D Launcher
 
-:: Check for Node.js
+echo ===================================================
+echo   FixIt3D - Jules Version (Final Edition)
+echo ===================================================
+echo.
+
+:: 1. Check for Node.js
 where node >nul 2>nul
 if %errorlevel% neq 0 (
-    echo [ERROR] Node.js не найден! Пожалуйста, установите Node.js с https://nodejs.org/
+    echo [CRITICAL ERROR] Node.js не найден.
+    echo Пожалуйста, установите Node.js с сайта https://nodejs.org/
+    echo Это необходимо для работы сервера.
     pause
     exit /b
 )
 
-:: Check for node_modules
+:: 2. Install dependencies if node_modules missing
 if not exist "node_modules\" (
-    echo [INFO] Установка зависимостей (npm install)... Это может занять минуту.
+    echo [INFO] Первый запуск: устанавливаем зависимости...
     call npm install
+    if !errorlevel! neq 0 (
+        echo [ERROR] Не удалось установить зависимости. Проверьте интернет-соединение.
+        pause
+        exit /b
+    )
 )
 
-:: Kill existing processes on port 3000
-echo [INFO] Очистка порта 3000...
+:: 3. Clean port 3000
+echo [INFO] Подготовка порта 3000...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr :3000') do (
-    echo [INFO] Завершение процесса PID %%a
+    echo [INFO] Завершение старого процесса (PID %%a)...
     taskkill /f /pid %%a >nul 2>&1
 )
 
-set PORT=3000
-echo [SUCCESS] Запуск сервера на http://localhost:3000
-echo [INFO] Если браузер не откроется сам, перейдите по ссылке вручную.
+:: 4. Start the browser automatically
+echo [INFO] Открываем браузер...
+start cmd /c "timeout /t 3 /nobreak > nul && start http://localhost:3000"
 
-:: Start browser with a slight delay
-start cmd /c "timeout /t 5 /nobreak > nul && start http://localhost:3000"
-
-:: Run server
+:: 5. Launch the server
+echo [SUCCESS] Сервер запускается на http://localhost:3000
+echo Нажмите Ctrl+C для остановки.
+echo ===================================================
 npm run dev
 
 endlocal
