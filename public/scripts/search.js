@@ -9,18 +9,18 @@ const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home'];
 
 async function searchModels(query = '', brand = '', page = 1) {
     const grid = document.getElementById('models-grid');
-    grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(6);
+    grid.innerHTML = '<div class="skeleton-v2"></div>'.repeat(8);
 
     currentQuery = query;
     currentBrand = brand;
 
     try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&mode=${currentMode}&page=${page}&per_page=18`);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&mode=${currentMode}&page=${page}&per_page=16`);
         const data = await response.json();
         renderResults(data);
     } catch (error) {
         console.error('Search error:', error);
-        grid.innerHTML = '<p class="error">Ошибка загрузки моделей. Попробуйте позже.</p>';
+        grid.innerHTML = '<p class="error">Ошибка загрузки моделей.</p>';
     }
 }
 
@@ -29,38 +29,37 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
     const resultsHeader = document.getElementById('results-count');
     grid.innerHTML = '';
 
-    resultsHeader.textContent = `Найдено моделей: ${totalResults || 0}`;
+    resultsHeader.textContent = currentMode === 'spare-parts' ? `Найдено запчастей: ${totalResults}` : `Найдено моделей: ${totalResults}`;
 
     if (!hits || hits.length === 0) {
-        grid.innerHTML = '<p class="no-results">Модели не найдены. Попробуйте другой запрос.</p>';
+        grid.innerHTML = '<p class="no-results">Ничего не найдено. Попробуйте другой запрос.</p>';
         document.getElementById('pagination-container').innerHTML = '';
         return;
     }
 
     hits.forEach(model => {
         const card = document.createElement('div');
-        card.className = 'model-card';
+        card.className = 'model-card-v2';
         card.innerHTML = `
-            <div class="model-card__image">
-                <img src="${model.image || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${model.name}" loading="lazy">
-                ${model.brand ? `<span class="brand-badge">${model.brand}</span>` : ''}
+            <div class="card-img-v2">
+                <img src="${model.image || 'https://via.placeholder.com/400x300?text=FixIt3D'}" alt="${model.name}" loading="lazy">
+                ${model.brand ? `<span class="card-badge-v2">${model.brand}</span>` : ''}
             </div>
-            <div class="model-card__content">
+            <div class="card-content-v2">
                 <h3>${model.name}</h3>
-                <p class="author">От ${model.author}</p>
-                <div class="model-card__footer">
-                    <button class="btn-primary view-btn" data-id="${model.objectID}">Посмотреть</button>
-                    <div class="popularity">⭐ ${model.popularity || 0}</div>
+                <p class="card-author-v2">От ${model.author}</p>
+                <div class="card-footer-v2">
+                    <button class="btn-view-v2" data-id="${model.objectID}">Открыть</button>
+                    <div class="card-popularity">⭐ ${model.popularity || 0}</div>
                 </div>
             </div>
         `;
         grid.appendChild(card);
     });
 
-    document.querySelectorAll('.view-btn').forEach(btn => {
+    document.querySelectorAll('.btn-view-v2').forEach(btn => {
         btn.addEventListener('click', () => {
-            const modelId = btn.getAttribute('data-id');
-            const model = hits.find(h => h.objectID === modelId);
+            const model = hits.find(h => h.objectID === btn.dataset.id);
             window.openModelModal(model);
         });
     });
@@ -73,41 +72,31 @@ function renderPagination(totalPages, currentPage) {
     container.innerHTML = '';
     if (totalPages <= 1) return;
 
-    const ul = document.createElement('ul');
-    ul.className = 'pagination';
-
-    // Simplified pagination for space
-    for (let i = 1; i <= totalPages; i++) {
-        if (i > 10) break; // Limit pages
-        const li = document.createElement('li');
-        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-        const a = document.createElement('a');
-        a.className = 'page-link';
-        a.href = '#models';
-        a.textContent = i;
-        a.addEventListener('click', (e) => {
-            e.preventDefault();
+    for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn-v2 ${i === currentPage ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
             searchModels(currentQuery, currentBrand, i);
+            document.getElementById('models').scrollIntoView({ behavior: 'smooth' });
         });
-        li.appendChild(a);
-        ul.appendChild(li);
+        container.appendChild(btn);
     }
-    container.appendChild(ul);
 }
 
 function updateFilters() {
     const container = document.getElementById('brand-filters');
-    container.innerHTML = '<button class="filter-btn active" data-brand="">Все</button>';
+    container.innerHTML = '<button class="filter-chip active" data-brand="">Все бренды</button>';
 
     const brands = currentMode === 'spare-parts' ? SPARE_PARTS_BRANDS : HOBBY_BRANDS;
 
     brands.forEach(brand => {
         const btn = document.createElement('button');
-        btn.className = 'filter-btn';
+        btn.className = 'filter-chip';
         btn.setAttribute('data-brand', brand);
         btn.textContent = brand;
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             searchModels(currentQuery, brand);
         });
@@ -119,24 +108,23 @@ function switchMode(mode) {
     currentMode = mode;
     currentBrand = '';
 
-    // Update Hero text
     const title = document.getElementById('hero-title');
     const subtitle = document.getElementById('hero-subtitle');
     
     if (mode === 'spare-parts') {
-        title.textContent = 'Найдите запчасть и вдохните жизнь в свои вещи';
-        subtitle.textContent = 'База проверенных 3D-моделей для ремонта техники.';
+        title.textContent = 'Верните технику к жизни с помощью 3D-печати';
+        subtitle.textContent = 'Более 3000 проверенных моделей для ремонта и вашего творчества.';
     } else {
         title.textContent = 'Мир 3D-моделей для вашего хобби';
-        subtitle.textContent = 'Фигурки, игры и декор для вашего творчества.';
+        subtitle.textContent = 'Фигурки, аксессуары и декор для ваших проектов.';
     }
 
-    document.querySelectorAll('.mode-btn').forEach(btn => {
+    document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
     });
 
     updateFilters();
-    searchModels(currentQuery, '');
+    searchModels('', '');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -146,15 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
 
-    searchBtn.addEventListener('click', () => {
-        searchModels(searchInput.value, currentBrand);
-    });
+    searchBtn.addEventListener('click', () => searchModels(searchInput.value, ''));
+    searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
 
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') searchBtn.click();
-    });
-
-    document.querySelectorAll('.mode-btn').forEach(btn => {
+    document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 });

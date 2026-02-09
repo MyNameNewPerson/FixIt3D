@@ -1,7 +1,7 @@
 // public/scripts/viewer.js
 
 const modal = document.getElementById('model-modal');
-const closeBtn = document.querySelector('.close-modal');
+const closeBtn = document.querySelector('.modal-close-v2');
 const downloadBtn = document.getElementById('download-btn');
 
 let currentModel = null;
@@ -11,19 +11,18 @@ window.openModelModal = function(model) {
     currentModel = model;
 
     document.getElementById('modal-title').textContent = model.name;
-    document.getElementById('modal-author').querySelector('span').textContent = model.author;
+    document.getElementById('modal-author').textContent = model.author;
     
     const viewer = document.getElementById('modal-viewer');
     viewer.poster = model.image || '';
-    viewer.src = model.stl_url || ''; // In real app, we'd have a GLB/USDZ for the viewer
+    viewer.src = model.stl_url || '';
     
     const externalLink = document.getElementById('external-link');
     externalLink.href = model.source_url;
 
-    renderCalculator();
     renderAffiliateLinks(model.name);
     renderServiceProviders();
-    checkReadyMade(model.name);
+    renderCalculator();
 
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -39,102 +38,97 @@ window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); 
 
 downloadBtn.addEventListener('click', () => {
     if (!currentModel) return;
+    // Track and redirect to source
+    fetch(`/api/track-click?modelId=${currentModel.objectID}&type=download`);
     window.open(currentModel.source_url, '_blank');
-    // In a real app, this would download the STL/ZIP
 });
 
 function renderAffiliateLinks(name) {
-    const section = document.getElementById('buy-ready-section');
     const container = document.getElementById('market-links');
+    const block = document.getElementById('affiliate-block');
     
-    // Simple logic to decide if we show marketplace links
-    const keywords = ['spring', 'motor', 'gear', 'shaft', 'blade', 'electronics', 'pump', 'switch'];
-    const needsMarketplace = keywords.some(k => name.toLowerCase().includes(k));
+    // decide if we show marketplace links
+    const keywords = ['spring', 'motor', 'gear', 'shaft', 'blade', 'electronics', 'pump', 'switch', 'handle', 'button', 'belt'];
+    const matches = keywords.some(k => name.toLowerCase().includes(k));
     
-    if (needsMarketplace) {
-        section.style.display = 'block';
+    if (matches) {
+        block.style.display = 'block';
         container.innerHTML = `
-            <a href="https://www.amazon.com/s?k=${encodeURIComponent(name)}" target="_blank" class="market-link">
-                Amazon <span>Купить</span>
+            <a href="https://www.amazon.com/s?k=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+                <span>Amazon</span>
+                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
             </a>
-            <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(name)}" target="_blank" class="market-link">
-                AliExpress <span>Купить</span>
+            <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+                <span>AliExpress</span>
+                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
             </a>
         `;
     } else {
-        section.style.display = 'none';
+        block.style.display = 'none';
     }
 }
 
 async function renderServiceProviders() {
-    const container = document.getElementById('nearest-master');
-    container.innerHTML = '<p>Поиск ближайшего мастера...</p>';
+    const container = document.getElementById('master-suggestion');
+    container.innerHTML = '<p>Загрузка мастеров...</p>';
 
     try {
         const response = await fetch('/data/masters.json');
         const data = await response.json();
 
-        // In a real app, use geolocation to find the closest one.
-        // For demo, just pick the first one.
-        const master = data.masters[0];
+        // Randomly pick one for demo, ideally use geolocation
+        const master = data.masters[Math.floor(Math.random() * data.masters.length)];
 
         container.innerHTML = `
-            <div class="master-card">
-                <h5>${master.name}</h5>
-                <p>📍 ${master.city}</p>
-                <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}?text=Здравствуйте, хочу заказать печать детали ${currentModel.name}" target="_blank" class="btn-primary" style="display:inline-block; text-decoration:none;">Заказать печать</a>
+            <div class="master-suggestion-card">
+                <div class="master-info">
+                    <h5>${master.name}</h5>
+                    <p>📍 ${master.city}</p>
+                </div>
+                <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Привет! Хочу заказать 3D-печать модели: ' + currentModel.name)}"
+                   target="_blank" class="btn-accent" style="padding: 10px 20px; font-size:0.875rem;">
+                   Заказать
+                </a>
             </div>
         `;
     } catch (error) {
-        container.innerHTML = '<p>Не удалось найти мастеров.</p>';
-    }
-}
-
-function checkReadyMade(name) {
-    // Logic to show "Buy ready-made" notice
-    const block = document.getElementById('buy-ready-section');
-    if (name.toLowerCase().includes('motor') || name.toLowerCase().includes('spring')) {
-        block.style.display = 'block';
+        container.innerHTML = '<p>Мастера временно недоступны.</p>';
     }
 }
 
 function renderCalculator() {
-    const section = document.getElementById('calculator-section');
-    const container = document.getElementById('calculator-controls');
-    const result = document.getElementById('calculator-result');
+    const container = document.getElementById('calc-ui');
+    const result = document.getElementById('calc-result-v2');
 
-    if (!currentModel.volume_cm3) {
-        section.style.display = 'none';
-        return;
-    }
+    // If no volume, we use a fallback of 50cm3
+    const volume = currentModel.volume_cm3 || 50;
 
-    section.style.display = 'block';
     container.innerHTML = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-            <div>
-                <label style="font-size:0.75rem; color:var(--text-muted)">Материал</label>
-                <select id="calc-material" style="width:100%; padding:0.5rem; border-radius:0.5rem; border:1px solid var(--border)">
-                    <option value="1.24">PLA</option>
-                    <option value="1.27">PETG</option>
-                    <option value="1.04">ABS</option>
-                </select>
-            </div>
-            <div>
-                <label style="font-size:0.75rem; color:var(--text-muted)">Заполнение (%)</label>
-                <input type="number" id="calc-infill" value="20" style="width:100%; padding:0.5rem; border-radius:0.5rem; border:1px solid var(--border)">
-            </div>
+        <div class="calc-field">
+            <label>Материал</label>
+            <select id="calc-mat-v2">
+                <option value="1.24">PLA (Стандарт)</option>
+                <option value="1.27">PETG (Прочный)</option>
+                <option value="1.04">ABS (Технический)</option>
+            </select>
+        </div>
+        <div class="calc-field">
+            <label>Заполнение (%)</label>
+            <input type="number" id="calc-inf-v2" value="20" min="10" max="100" step="10">
         </div>
     `;
 
-    const calc = () => {
-        const density = parseFloat(document.getElementById('calc-material').value);
-        const infill = parseFloat(document.getElementById('calc-infill').value) / 100;
-        const weight = currentModel.volume_cm3 * density * infill;
-        const cost = weight * 5; // 5 units per gram
-        result.innerHTML = `Примерный вес: <strong>${weight.toFixed(1)}г</strong>. Ориентировочная стоимость: <strong>${cost.toFixed(0)} ₽</strong>`;
+    const calculate = () => {
+        const density = parseFloat(document.getElementById('calc-mat-v2').value);
+        const infill = parseInt(document.getElementById('calc-inf-v2').value) / 100;
+
+        const weight = volume * density * (infill + 0.1); // +10% for supports
+        const cost = Math.max(150, weight * 15); // Min price 150 rub, 15 rub per gram
+
+        result.innerHTML = `Вес: ~${weight.toFixed(1)} г | Цена: ~${Math.round(cost)} ₽`;
     };
 
-    document.getElementById('calc-material').addEventListener('change', calc);
-    document.getElementById('calc-infill').addEventListener('input', calc);
-    calc();
+    document.getElementById('calc-mat-v2').addEventListener('change', calculate);
+    document.getElementById('calc-inf-v2').addEventListener('input', calculate);
+    calculate();
 }

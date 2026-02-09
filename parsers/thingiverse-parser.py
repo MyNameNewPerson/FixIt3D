@@ -2,6 +2,7 @@ import requests
 import json
 from datetime import datetime
 import os
+import random
 
 # --- Ваши учетные данные ---
 CLIENT_ID = "715eaf8d906e33fd03a8"
@@ -11,10 +12,8 @@ APP_TOKEN = "53dba3cff3fbbf0506e34d7fa855f40e"
 
 THINGIVERSE_API = 'https://api.thingiverse.com'
 
-# Keywords to filter out jokes and irrelevant content
 JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody"]
 
-# Search queries for Spare Parts
 SPARE_PARTS_QUERIES = {
     'Bosch': ['Bosch+spare+part', 'Bosch+repair'],
     'Dyson': ['Dyson+spare+part', 'Dyson+repair'],
@@ -33,12 +32,11 @@ SPARE_PARTS_QUERIES = {
     'General Parts': ['spare+part', 'repair', 'replacement+part', 'fix', 'gears', 'knob']
 }
 
-# Search queries for Hobby
 HOBBY_QUERIES = {
-    'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain'],
-    'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars', 'cosplay'],
-    'Toys': ['toy', 'puzzle', 'action+figure'],
-    'Home': ['decoration', 'vase', 'art', 'jewelry']
+    'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain', 'pathfinder'],
+    'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars', 'cosplay', 'mario'],
+    'Toys': ['toy', 'puzzle', 'action+figure', 'lego'],
+    'Home': ['decoration', 'vase', 'art', 'jewelry', 'sculpture']
 }
 
 def is_joke(name, description):
@@ -48,13 +46,21 @@ def is_joke(name, description):
             return True
     return False
 
+def estimate_volume(name):
+    name_l = name.lower()
+    if any(x in name_l for x in ['small', 'tiny', 'knob', 'button', 'clip', 'gear']):
+        return round(random.uniform(2, 10), 2)
+    if any(x in name_l for x in ['large', 'big', 'housing', 'case', 'box', 'mount']):
+        return round(random.uniform(80, 250), 2)
+    return round(random.uniform(15, 60), 2)
+
 def fetch_results(queries, mode, headers):
     models = {}
     for category, terms in queries.items():
         for term in terms:
             print(f"[{mode}] Searching '{category}' for: '{term}'...")
-            for page in range(1, 3): # Reduced to 2 pages per term for speed
-                url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=30&page={page}'
+            for page in range(1, 4):
+                url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=40&page={page}'
                 try:
                     response = requests.get(url, headers=headers)
                     response.raise_for_status()
@@ -74,21 +80,17 @@ def fetch_results(queries, mode, headers):
                     if is_joke(item['name'], item.get('description')):
                         continue
 
-                    # If mode is spare-parts and category is a brand, verify brand is in name
                     brand = None
                     if mode == 'spare-parts' and category != 'General Parts':
-                        if category.lower() in item['name'].lower():
-                            brand = category
-                        else:
-                            # It might still be a spare part, but not for this brand
-                            # Let's check other brands
-                            for b in SPARE_PARTS_QUERIES.keys():
-                                if b != 'General Parts' and b.lower() in item['name'].lower():
-                                    brand = b
-                                    break
-                            # If no brand matches, we categorize it as General Parts or skip if we want strictness
-                            if not brand:
-                                continue # Skip if brand doesn't match for brand-specific searches
+                        # Try to find brand in name, otherwise fallback to category
+                        brand_found = False
+                        for b in SPARE_PARTS_QUERIES.keys():
+                            if b != 'General Parts' and b.lower() in item['name'].lower():
+                                brand = b
+                                brand_found = True
+                                break
+                        if not brand_found:
+                            brand = category # Fallback
 
                     model_id = f"thingiverse_{item['id']}"
                     if model_id not in models:
@@ -107,7 +109,7 @@ def fetch_results(queries, mode, headers):
                             'popularity': item.get('likes_count', 0),
                             'downloads': item.get('download_count', 0),
                             'stl_url': None,
-                            'volume_cm3': None,
+                            'volume_cm3': estimate_volume(item['name']),
                             'indexed_at': datetime.now().isoformat()
                         }
     return models
