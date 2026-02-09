@@ -1,7 +1,6 @@
 @echo off
 echo Starting the FixIt3D server...
-start cmd /k "npm run dev"
-echo Waiting for server to start...
-timeout /t 5 /nobreak > nul
-echo Opening the website in your browser...
-start http://localhost:3000
+echo You can access the website at http://localhost:3001
+
+start cmd /c "timeout /t 5 /nobreak > nul && start http://localhost:3001"
+npm run dev

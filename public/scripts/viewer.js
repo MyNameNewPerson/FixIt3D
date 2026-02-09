@@ -17,12 +17,7 @@ window.openModelModal = function(model) {
     const viewer = document.getElementById('modal-viewer');
     
     viewer.poster = model.image || 'https://via.placeholder.com/400x300?text=No+Image';
-
-    if (model.stl_url) {
-      viewer.src = `/api/get-model?url=${encodeURIComponent(model.stl_url)}`;
-    } else {
-      viewer.src = '';
-    }
+    viewer.src = '';
     
     const externalLink = document.getElementById('external-link');
     externalLink.href = model.source_url;
@@ -52,39 +47,19 @@ downloadBtn.addEventListener('click', async () => {
     const modelId = downloadBtn.getAttribute('data-id');
     if (!modelId) return;
 
-    downloadBtn.disabled = true;
-    const originalText = downloadBtn.innerHTML;
-    downloadBtn.innerHTML = '<span>⏳</span> Подготовка...';
-
-    try {
-        const response = await fetch(`/api/download?modelId=${modelId}`);
-        if (!response.ok) throw new Error('Download failed');
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${modelId}.zip`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-
-        downloadBtn.innerHTML = '✅ Готово!';
-        
-        // Track click
-        fetch(`/api/track-click?modelId=${modelId}&type=download`);
-
-    } catch (error) {
-        console.error('Download error:', error);
-        alert('Ошибка при скачивании файла. Попробуйте позже.');
-        downloadBtn.innerHTML = '❌ Ошибка';
-    } finally {
-        setTimeout(() => {
-            downloadBtn.disabled = false;
-            downloadBtn.innerHTML = originalText;
-        }, 3000);
+    // Extract the numeric ID from the objectID (e.g., "thingiverse_12345" -> "12345")
+    const thingId = modelId.split('_')[1];
+    if (!thingId) {
+        console.error('Could not extract thing ID from', modelId);
+        alert('Ошибка при скачивании файла.');
+        return;
     }
+
+    // Просто перенаправляем на эндпоинт скачивания
+    window.location.href = `/api/download?thing_id=${thingId}`;
+    
+    // Track click
+    fetch(`/api/track-click?modelId=${modelId}&type=download`);
 });
 
 // --- CALCULATOR LOGIC ---

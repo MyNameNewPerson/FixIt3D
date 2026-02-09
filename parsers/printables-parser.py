@@ -8,16 +8,13 @@ from stl import mesh
 # Required dependencies:
 # pip install requests numpy numpy-stl
 
-PRINTABLES_API = 'https://api.printables.com/graphql'
+PRINTABLES_API = 'https://api.printables.com/graphql/'
 
 QUERY = '''
-query GetRepairModels($offset: Int!) {
+query GetPopularModels($offset: Int!) {
   prints(
-    tags: ["spare-part", "repair", "replacement"],
-    licenseType: COMMERCIAL_USE_ALLOWED,
     limit: 100,
-    offset: $offset,
-    ordering: "-likes_count"
+    offset: $offset
   ) {
     id
     name
@@ -46,9 +43,14 @@ def get_stl_volume(stl_url):
     """Downloads an STL file and calculates its volume in cm³."""
     if not stl_url:
         return None
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+    }
+
     try:
         # Download the file
-        response = requests.get(stl_url, timeout=20)
+        response = requests.get(stl_url, timeout=20, headers=headers)
         response.raise_for_status()
         
         # Load the STL from memory
@@ -81,12 +83,20 @@ def parse_printables():
     all_models = []
     offset = 0
     
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': 'https://www.printables.com/'
+    }
+    
     while offset < 200:  # Reduced limit for demo purposes
         try:
             response = requests.post(PRINTABLES_API, json={
                 'query': QUERY,
                 'variables': {'offset': offset}
-            })
+            }, headers=headers)
             response.raise_for_status()
             data = response.json()
         except Exception as e:
@@ -140,7 +150,7 @@ def parse_printables():
     with open('data/models-index.json', 'w', encoding='utf-8') as f:
         json.dump(all_models, f, ensure_ascii=False, indent=2)
 
-    print(f"✅ Обработано {len(all_models)} моделей")
+    print(f"Obrabotano {len(all_models)} modeley")
 
 if __name__ == '__main__':
     parse_printables()

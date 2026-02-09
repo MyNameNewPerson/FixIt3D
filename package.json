@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "algoliasearch": "^4.22.1",
+    "express": "^4.18.2",
     "jszip": "^3.10.1",
-    "express": "^4.18.2"
+    "node-fetch": "^3.3.2"
   }
 }
