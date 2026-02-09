@@ -2,66 +2,67 @@
 
 let currentQuery = '';
 let currentBrand = '';
-let currentMode = 'spare-parts';
+let currentMode = 'spare-parts'; // 'spare-parts' or 'hobby'
+let currentPage = 1;
 
-const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'Indesit', 'Kenwood', 'Moulinex'];
-const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home'];
+const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux'];
+const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home', 'Decor', 'Cosplay'];
 
 async function searchModels(query = '', brand = '', page = 1) {
     const grid = document.getElementById('models-grid');
-    grid.innerHTML = '<div class="skeleton-v2"></div>'.repeat(8);
+    grid.innerHTML = '<div class="card-skeleton"></div>'.repeat(8);
 
     currentQuery = query;
     currentBrand = brand;
+    currentPage = page;
 
     try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&mode=${currentMode}&page=${page}&per_page=16`);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&mode=${currentMode}&page=${page}&per_page=12`);
         const data = await response.json();
         renderResults(data);
     } catch (error) {
         console.error('Search error:', error);
-        grid.innerHTML = '<p class="error">Ошибка загрузки моделей.</p>';
+        grid.innerHTML = '<p class="error">Ошибка загрузки моделей. Пожалуйста, попробуйте позже.</p>';
     }
 }
 
 function renderResults({ hits, totalPages, currentPage, totalResults }) {
     const grid = document.getElementById('models-grid');
-    const resultsHeader = document.getElementById('results-count');
+    const resultsCount = document.getElementById('results-count');
     grid.innerHTML = '';
 
-    resultsHeader.textContent = currentMode === 'spare-parts' ? `Найдено запчастей: ${totalResults}` : `Найдено моделей: ${totalResults}`;
+    resultsCount.textContent = `${totalResults} моделей`;
 
     if (!hits || hits.length === 0) {
-        grid.innerHTML = '<p class="no-results">Ничего не найдено. Попробуйте другой запрос.</p>';
+        grid.innerHTML = '<div class="no-results"><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или сбросить фильтры.</p></div>';
         document.getElementById('pagination-container').innerHTML = '';
         return;
     }
 
     hits.forEach(model => {
         const card = document.createElement('div');
-        card.className = 'model-card-v2';
+        card.className = 'model-card';
         card.innerHTML = `
-            <div class="card-img-v2">
-                <img src="${model.image || 'https://via.placeholder.com/400x300?text=FixIt3D'}" alt="${model.name}" loading="lazy">
-                ${model.brand ? `<span class="card-badge-v2">${model.brand}</span>` : ''}
+            <div class="card-image">
+                <img src="${model.image || 'https://via.placeholder.com/400x300?text=FixIt3D'}" alt="${model.name}" loading="lazy" referrerpolicy="no-referrer">
+                ${model.brand ? `<span class="card-badge">${model.brand}</span>` : ''}
             </div>
-            <div class="card-content-v2">
+            <div class="card-body">
                 <h3>${model.name}</h3>
-                <p class="card-author-v2">От ${model.author}</p>
-                <div class="card-footer-v2">
-                    <button class="btn-view-v2" data-id="${model.objectID}">Открыть</button>
+                <p class="card-author">От ${model.author}</p>
+                <div class="card-footer">
+                    <span class="btn-card-action">Подробнее →</span>
                     <div class="card-popularity">⭐ ${model.popularity || 0}</div>
                 </div>
             </div>
         `;
-        grid.appendChild(card);
-    });
 
-    document.querySelectorAll('.btn-view-v2').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const model = hits.find(h => h.objectID === btn.dataset.id);
+        // Make the whole card clickable
+        card.addEventListener('click', () => {
             window.openModelModal(model);
         });
+
+        grid.appendChild(card);
     });
 
     renderPagination(totalPages, currentPage);
@@ -72,21 +73,30 @@ function renderPagination(totalPages, currentPage) {
     container.innerHTML = '';
     if (totalPages <= 1) return;
 
-    for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxVisible - 1);
+
+    if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1);
+    }
+
+    for (let i = start; i <= end; i++) {
         const btn = document.createElement('button');
-        btn.className = `page-btn-v2 ${i === currentPage ? 'active' : ''}`;
+        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
         btn.textContent = i;
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             searchModels(currentQuery, currentBrand, i);
-            document.getElementById('models').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('models-section').scrollIntoView({ behavior: 'smooth' });
         });
         container.appendChild(btn);
     }
 }
 
-function updateFilters() {
+function updateBrandFilters() {
     const container = document.getElementById('brand-filters');
-    container.innerHTML = '<button class="filter-chip active" data-brand="">Все бренды</button>';
+    container.innerHTML = '<button class="filter-chip active" data-brand="">Все</button>';
 
     const brands = currentMode === 'spare-parts' ? SPARE_PARTS_BRANDS : HOBBY_BRANDS;
 
@@ -95,7 +105,8 @@ function updateFilters() {
         btn.className = 'filter-chip';
         btn.setAttribute('data-brand', brand);
         btn.textContent = brand;
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             searchModels(currentQuery, brand);
@@ -104,40 +115,53 @@ function updateFilters() {
     });
 }
 
-function switchMode(mode) {
-    currentMode = mode;
-    currentBrand = '';
+function switchMode(isHobby) {
+    currentMode = isHobby ? 'hobby' : 'spare-parts';
+    document.body.className = isHobby ? 'hobby-mode' : 'spare-parts-mode';
 
-    const title = document.getElementById('hero-title');
-    const subtitle = document.getElementById('hero-subtitle');
-    
-    if (mode === 'spare-parts') {
-        title.textContent = 'Верните технику к жизни с помощью 3D-печати';
-        subtitle.textContent = 'Более 3000 проверенных моделей для ремонта и вашего творчества.';
+    const mainTitle = document.getElementById('main-title');
+    const mainSubtitle = document.getElementById('main-subtitle');
+    const catalogTitle = document.getElementById('catalog-title');
+
+    if (isHobby) {
+        mainTitle.innerHTML = 'Создавайте <span class="text-gradient">шедевры</span> сами';
+        mainSubtitle.textContent = 'Тысячи моделей для хобби, игр и декора. От настольных миниатюр до интерьерных решений.';
+        catalogTitle.textContent = 'Топ моделей для хобби';
     } else {
-        title.textContent = 'Мир 3D-моделей для вашего хобби';
-        subtitle.textContent = 'Фигурки, аксессуары и декор для ваших проектов.';
+        mainTitle.innerHTML = 'Найдите деталь, которую <span class="text-gradient">нельзя купить</span>';
+        mainSubtitle.textContent = 'База из 5000+ 3D-моделей для ремонта бытовой техники и электроники. Печатайте сами или заказывайте у мастеров.';
+        catalogTitle.textContent = 'Популярные запчасти';
     }
 
-    document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
-    });
-
-    updateFilters();
+    currentBrand = '';
+    updateBrandFilters();
     searchModels('', '');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    updateFilters();
+    // Initial load
+    updateBrandFilters();
     searchModels();
 
+    // Search inputs
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
 
     searchBtn.addEventListener('click', () => searchModels(searchInput.value, ''));
     searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
 
-    document.querySelectorAll('.mode-toggle-btn').forEach(btn => {
-        btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+    // Mode Toggle
+    const modeToggle = document.getElementById('mode-toggle');
+    modeToggle.addEventListener('change', () => {
+        switchMode(modeToggle.checked);
+    });
+
+    // Tag clicks
+    document.querySelectorAll('.search-tag').forEach(tag => {
+        tag.addEventListener('click', (e) => {
+            e.preventDefault();
+            searchInput.value = tag.textContent;
+            searchModels(tag.textContent, '');
+        });
     });
 });

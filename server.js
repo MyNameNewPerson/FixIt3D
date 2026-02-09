@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 app.use('/data', express.static('data'));
@@ -37,6 +37,6 @@ app.all('/api/:name', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`FixIt3D dev server listening at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`FixIt3D dev server listening at http://0.0.0.0:${port}`);
 });

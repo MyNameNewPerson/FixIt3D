@@ -2,6 +2,8 @@
 import fs from 'fs';
 import path from 'path';
 
+const BLACKLIST_WORDS = ['joke', 'meme', 'funny', 'gag', 'prank', 'fake', 'parody', 'shit', 'dumb', 'stupid'];
+
 export default async function handler(req, res) {
   const { q = '', brand = '', mode = 'spare-parts', page = 1, per_page = 20 } = req.query;
 
@@ -14,22 +16,39 @@ export default async function handler(req, res) {
     const fileData = fs.readFileSync(dataPath, 'utf8');
     let allHits = JSON.parse(fileData);
 
-    // Filter by mode
+    // Initial filter by mode
     let filteredHits = allHits.filter(h => h.mode === mode);
 
-    // Filter by query
+    // Hard filter out blacklist words from names
+    filteredHits = filteredHits.filter(h => {
+      const name = h.name.toLowerCase();
+      return !BLACKLIST_WORDS.some(word => name.includes(word));
+    });
+
+    // If spare-parts mode and brand is specified, be strict
+    if (mode === 'spare-parts' && brand) {
+      filteredHits = filteredHits.filter(h => {
+        const name = h.name.toLowerCase();
+        const brandL = brand.toLowerCase();
+        // Either the brand is explicitly set in metadata OR it's in the name
+        return h.brand === brand || name.includes(brandL);
+      });
+    }
+
+    // Filter by search query
     if (q) {
       const query = q.toLowerCase();
       filteredHits = filteredHits.filter(h =>
         h.name.toLowerCase().includes(query) ||
         (h.description && h.description.toLowerCase().includes(query)) ||
-        (h.category && h.category.toLowerCase().includes(query))
+        (h.category && h.category.toLowerCase().includes(query)) ||
+        (h.brand && h.brand.toLowerCase().includes(query))
       );
     }
 
-    // Filter by brand
-    if (brand) {
-      filteredHits = filteredHits.filter(h => h.brand === brand);
+    // Brand filter (if not already handled by strict brand filter)
+    if (brand && mode !== 'spare-parts') {
+      filteredHits = filteredHits.filter(h => h.brand === brand || h.category === brand);
     }
 
     const totalResults = filteredHits.length;

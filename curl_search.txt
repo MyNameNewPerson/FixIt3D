@@ -1,4 +1,0 @@
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100   356  100   356    0     0   141k      0 --:--:-- --:--:-- --:--:--  173k
-{"hits":[{"objectID":"test_1","name":"Bosch Dishwasher Gear","author":"RepairGuy","image":"https://via.placeholder.com/400x300?text=Bosch+Gear","popularity":42,"brand":"Bosch","source":"printables","source_url":"https://www.printables.com/model/1","license":"CC BY 4.0","stl_url":"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"}]}

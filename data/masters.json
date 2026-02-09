@@ -1,104 +1,49 @@
 {
   "masters": [
     {
-      "id": "master_001",
-      "name": "3DPrint Moscow",
-      "city": "Москва",
+      "id": 1,
+      "name": "Pro 3D Service",
+      "city": "Moscow",
       "lat": 55.7558,
       "lng": 37.6173,
-      "phone": "+7 (915) 123-45-67",
-      "whatsapp": "+79151234567",
-      "website": "https://3dprint-moscow.ru"
+      "phone": "+79001234567",
+      "whatsapp": "+79001234567"
     },
     {
-      "id": "master_002",
-      "name": "SPB 3D Lab",
-      "city": "Санкт-Петербург",
+      "id": 2,
+      "name": "TechPrint Studio",
+      "city": "Saint Petersburg",
       "lat": 59.9343,
       "lng": 30.3351,
-      "phone": "+7 (812) 987-65-43",
-      "whatsapp": "+78129876543",
-      "website": "https://spb3dlab.ru"
+      "phone": "+79007654321",
+      "whatsapp": "+79007654321"
     },
     {
-      "id": "master_003",
-      "name": "Ural Print",
-      "city": "Екатеринбург",
-      "lat": 56.8389,
-      "lng": 60.6057,
-      "phone": "+7 (343) 111-22-33",
-      "whatsapp": "+73431112233",
-      "website": "https://ural-print.ru"
-    },
-    {
-      "id": "master_004",
-      "name": "Kazan Tech",
-      "city": "Казань",
-      "lat": 55.8304,
-      "lng": 49.0661,
-      "phone": "+7 (843) 444-55-66",
-      "whatsapp": "+78434445566",
-      "website": "https://kazantech.ru"
-    },
-    {
-      "id": "master_005",
-      "name": "Novosibirsk Maker",
-      "city": "Новосибирск",
+      "id": 3,
+      "name": "FixIt 3D",
+      "city": "Novosibirsk",
       "lat": 55.0084,
       "lng": 82.9357,
-      "phone": "+7 (383) 777-88-99",
-      "whatsapp": "+73837778899",
-      "website": "https://nsk-maker.ru"
+      "phone": "+79001112233",
+      "whatsapp": "+79001112233"
     },
     {
-      "id": "master_006",
-      "name": "Krasnodar 3D",
-      "city": "Краснодар",
-      "lat": 45.0355,
-      "lng": 38.9747,
-      "phone": "+7 (861) 222-33-44",
-      "whatsapp": "+78612223344",
-      "website": "https://krd3d.ru"
+      "id": 4,
+      "name": "Smart Parts 3D",
+      "city": "Ekaterinburg",
+      "lat": 56.8389,
+      "lng": 60.6057,
+      "phone": "+79004445566",
+      "whatsapp": "+79004445566"
     },
     {
-      "id": "master_007",
-      "name": "Vladivostok Print",
-      "city": "Владивосток",
-      "lat": 43.1198,
-      "lng": 131.8869,
-      "phone": "+7 (423) 555-66-77",
-      "whatsapp": "+74235556677",
-      "website": "https://vl-print.ru"
-    },
-    {
-      "id": "master_008",
-      "name": "Nizhny 3D",
-      "city": "Нижний Новгород",
-      "lat": 56.3269,
-      "lng": 44.0059,
-      "phone": "+7 (831) 333-44-55",
-      "whatsapp": "+78313334455",
-      "website": "https://nizhny3d.ru"
-    },
-    {
-      "id": "master_009",
-      "name": "Samara Maker Space",
-      "city": "Самара",
-      "lat": 53.2415,
-      "lng": 50.2212,
-      "phone": "+7 (846) 666-77-88",
-      "whatsapp": "+78466667788",
-      "website": "https://samara-maker.ru"
-    },
-    {
-      "id": "master_010",
-      "name": "Rostov 3D Hub",
-      "city": "Ростов-на-Дону",
-      "lat": 47.2357,
-      "lng": 39.7015,
-      "phone": "+7 (863) 888-99-00",
-      "whatsapp": "+78638889900",
-      "website": "https://rostov3d.ru"
+      "id": 5,
+      "name": "Kazan 3D Hub",
+      "city": "Kazan",
+      "lat": 55.7887,
+      "lng": 49.1221,
+      "phone": "+79009998877",
+      "whatsapp": "+79009998877"
     }
   ]
 }

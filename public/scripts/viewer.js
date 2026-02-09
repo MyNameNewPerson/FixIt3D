@@ -1,8 +1,9 @@
 // public/scripts/viewer.js
 
 const modal = document.getElementById('model-modal');
-const closeBtn = document.querySelector('.modal-close-v2');
+const closeBtn = document.querySelector('.close-modal');
 const downloadBtn = document.getElementById('download-btn');
+const externalLink = document.getElementById('external-link');
 
 let currentModel = null;
 
@@ -10,20 +11,34 @@ window.openModelModal = function(model) {
     if (!model) return;
     currentModel = model;
 
+    // Basic Info
     document.getElementById('modal-title').textContent = model.name;
     document.getElementById('modal-author').textContent = model.author;
     
+    // Visuals
     const viewer = document.getElementById('modal-viewer');
-    viewer.poster = model.image || '';
-    viewer.src = model.stl_url || '';
+    const fallback = document.getElementById('modal-image-fallback');
     
-    const externalLink = document.getElementById('external-link');
+    if (model.stl_url) {
+        viewer.style.display = 'block';
+        fallback.style.display = 'none';
+        viewer.src = model.stl_url;
+        viewer.poster = model.image || '';
+    } else {
+        viewer.style.display = 'none';
+        fallback.style.display = 'block';
+        fallback.src = model.image || 'https://via.placeholder.com/800x600?text=No+Preview';
+    }
+
+    // External Links
     externalLink.href = model.source_url;
 
+    // Features
     renderAffiliateLinks(model.name);
-    renderServiceProviders();
-    renderCalculator();
+    renderMasterSuggestion();
+    initCalculator();
 
+    // Show Modal
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 };
@@ -38,7 +53,7 @@ window.addEventListener('click', (e) => { if (e.target === modal) closeModal(); 
 
 downloadBtn.addEventListener('click', () => {
     if (!currentModel) return;
-    // Track and redirect to source
+    // Tracking
     fetch(`/api/track-click?modelId=${currentModel.objectID}&type=download`);
     window.open(currentModel.source_url, '_blank');
 });
@@ -47,20 +62,21 @@ function renderAffiliateLinks(name) {
     const container = document.getElementById('market-links');
     const block = document.getElementById('affiliate-block');
     
-    // decide if we show marketplace links
-    const keywords = ['spring', 'motor', 'gear', 'shaft', 'blade', 'electronics', 'pump', 'switch', 'handle', 'button', 'belt'];
-    const matches = keywords.some(k => name.toLowerCase().includes(k));
+    // Decide if we show marketplace links (mostly for spare parts)
+    const keywords = ['spare', 'repair', 'replacement', 'part', 'bosch', 'dyson', 'samsung', 'gear', 'knob', 'handle', 'pump'];
+    const isFunctional = keywords.some(k => name.toLowerCase().includes(k));
     
-    if (matches) {
+    if (isFunctional) {
         block.style.display = 'block';
+        const q = encodeURIComponent(name);
         container.innerHTML = `
-            <a href="https://www.amazon.com/s?k=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+            <a href="https://www.amazon.com/s?k=${q}" target="_blank" class="market-btn">
                 <span>Amazon</span>
-                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
+                <span style="opacity:0.5">→</span>
             </a>
-            <a href="https://www.aliexpress.com/wholesale?SearchText=${encodeURIComponent(name)}" target="_blank" class="market-link-v2">
+            <a href="https://www.aliexpress.com/wholesale?SearchText=${q}" target="_blank" class="market-btn">
                 <span>AliExpress</span>
-                <span style="font-size:0.8rem; opacity:0.7">Найти →</span>
+                <span style="opacity:0.5">→</span>
             </a>
         `;
     } else {
@@ -68,67 +84,53 @@ function renderAffiliateLinks(name) {
     }
 }
 
-async function renderServiceProviders() {
+async function renderMasterSuggestion() {
     const container = document.getElementById('master-suggestion');
-    container.innerHTML = '<p>Загрузка мастеров...</p>';
+    container.innerHTML = '<p style="font-size:0.875rem; color:var(--text-muted)">Загрузка мастеров...</p>';
 
     try {
         const response = await fetch('/data/masters.json');
         const data = await response.json();
 
-        // Randomly pick one for demo, ideally use geolocation
+        // Use geolocation to find closest (simplified here: random for demo)
         const master = data.masters[Math.floor(Math.random() * data.masters.length)];
 
         container.innerHTML = `
-            <div class="master-suggestion-card">
-                <div class="master-info">
-                    <h5>${master.name}</h5>
-                    <p>📍 ${master.city}</p>
-                </div>
-                <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Привет! Хочу заказать 3D-печать модели: ' + currentModel.name)}"
-                   target="_blank" class="btn-accent" style="padding: 10px 20px; font-size:0.875rem;">
-                   Заказать
-                </a>
+            <div class="master-info-mini">
+                <p style="font-weight:700; color:#166534">${master.name}</p>
+                <p style="font-size:0.75rem; color:#15803d">${master.city} • Рядом с вами</p>
             </div>
+            <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Привет! Хочу заказать 3D-печать модели: ' + currentModel.name)}"
+               target="_blank" class="btn-primary" style="padding: 8px 16px; font-size:0.75rem; flex:none; width:auto">
+               Заказать
+            </a>
         `;
     } catch (error) {
-        container.innerHTML = '<p>Мастера временно недоступны.</p>';
+        container.innerHTML = '<p style="font-size:0.875rem; color:var(--text-muted)">Мастера временно недоступны.</p>';
     }
 }
 
-function renderCalculator() {
-    const container = document.getElementById('calc-ui');
-    const result = document.getElementById('calc-result-v2');
+function initCalculator() {
+    const matSelect = document.getElementById('calc-mat');
+    const infInput = document.getElementById('calc-inf');
+    const infVal = document.getElementById('inf-val');
+    const resultDiv = document.getElementById('calc-result');
 
-    // If no volume, we use a fallback of 50cm3
-    const volume = currentModel.volume_cm3 || 50;
+    const volume = currentModel.volume_cm3 || 35; // default fallback
 
-    container.innerHTML = `
-        <div class="calc-field">
-            <label>Материал</label>
-            <select id="calc-mat-v2">
-                <option value="1.24">PLA (Стандарт)</option>
-                <option value="1.27">PETG (Прочный)</option>
-                <option value="1.04">ABS (Технический)</option>
-            </select>
-        </div>
-        <div class="calc-field">
-            <label>Заполнение (%)</label>
-            <input type="number" id="calc-inf-v2" value="20" min="10" max="100" step="10">
-        </div>
-    `;
+    const update = () => {
+        const density = parseFloat(matSelect.value);
+        const infill = parseInt(infInput.value);
+        infVal.textContent = `${infill}%`;
 
-    const calculate = () => {
-        const density = parseFloat(document.getElementById('calc-mat-v2').value);
-        const infill = parseInt(document.getElementById('calc-inf-v2').value) / 100;
+        // Rough formula: weight = volume * density * (infill/100 + shells)
+        const weight = volume * density * (infill/100 + 0.15);
+        const price = Math.max(350, Math.round(weight * 18)); // min 350 rub, 18 rub/gram
 
-        const weight = volume * density * (infill + 0.1); // +10% for supports
-        const cost = Math.max(150, weight * 15); // Min price 150 rub, 15 rub per gram
-
-        result.innerHTML = `Вес: ~${weight.toFixed(1)} г | Цена: ~${Math.round(cost)} ₽`;
+        resultDiv.textContent = `~ ${price} ₽`;
     };
 
-    document.getElementById('calc-mat-v2').addEventListener('change', calculate);
-    document.getElementById('calc-inf-v2').addEventListener('input', calculate);
-    calculate();
+    matSelect.onchange = update;
+    infInput.oninput = update;
+    update();
 }
