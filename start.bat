@@ -1,6 +1,10 @@
 @echo off
-echo Starting the FixIt3D server...
-echo You can access the website at http://localhost:3001
-
-start cmd /c "timeout /t 5 /nobreak > nul && start http://localhost:3001"
-npm run dev
+TITLE FixIt3D Launcher
+echo Starting FixIt3D...
+node launcher.js
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [ERROR] Launcher failed to start.
+    echo Please make sure Node.js is installed.
+    pause
+)

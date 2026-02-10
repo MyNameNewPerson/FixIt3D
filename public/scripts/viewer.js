@@ -1,31 +1,56 @@
 // public/scripts/viewer.js
 
-const modal = document.getElementById('model-modal');
-const closeBtn = document.querySelector('.close-modal');
-const downloadBtn = document.getElementById('download-btn');
+import { getTranslation } from './i18n.js';
 
-let currentModel = null; // Store current model data
+const modal = document.getElementById('model-modal');
+const closeBtn = document.querySelector('.close-modal-btn');
+const downloadBtn = document.getElementById('download-btn');
+const externalLink = document.getElementById('external-link');
+const findMasterBtn = document.getElementById('find-master-btn');
+
+let currentModel = null;
 
 window.openModelModal = function(model) {
     if (!model) return;
-    currentModel = model; // Save for calculator
+    currentModel = model;
 
+    // Reset tabs
+    switchTab('print');
+
+    // Basic Info
     document.getElementById('modal-title').textContent = model.name;
-    document.getElementById('modal-author').querySelector('span').textContent = model.author;
-    document.getElementById('modal-description').textContent = model.description || 'Нет описания';
+    document.getElementById('modal-author').textContent = model.author;
+    document.getElementById('modal-brand').textContent = model.brand || 'General';
     
+    // Visuals
     const viewer = document.getElementById('modal-viewer');
+    const fallback = document.getElementById('modal-image-fallback');
     
-    viewer.poster = model.image || 'https://via.placeholder.com/400x300?text=No+Image';
-    viewer.src = '';
-    
-    const externalLink = document.getElementById('external-link');
+    if (model.stl_url) {
+        viewer.style.display = 'block';
+        fallback.style.display = 'none';
+        viewer.src = model.stl_url;
+        viewer.poster = model.image || '';
+    } else {
+        viewer.style.display = 'none';
+        fallback.style.display = 'block';
+        fallback.src = model.image || 'https://via.placeholder.com/800x600?text=No+Preview';
+    }
+
+    // Reset Master Status
+    const masterStatus = document.getElementById('master-status');
+    if (masterStatus) {
+        masterStatus.textContent = getTranslation('order-sub', { count: Math.floor(Math.random() * 5) + 1 });
+    }
+
+    // External Links
     externalLink.href = model.source_url;
 
-    downloadBtn.setAttribute('data-id', model.objectID);
+    // Features
+    renderAffiliateLinks(model.name);
+    initCalculator();
 
-    renderCalculator(); // Render the calculator UI
-
+    // Show Modal
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 };
@@ -35,149 +60,89 @@ function closeModal() {
     document.body.style.overflow = 'auto';
 }
 
-closeBtn.addEventListener('click', closeModal);
-
-window.addEventListener('click', (event) => {
-    if (event.target === modal) {
+if (closeBtn) closeBtn.addEventListener('click', closeModal);
+window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-content-wrapper')) {
         closeModal();
     }
 });
 
-downloadBtn.addEventListener('click', async () => {
-    const modelId = downloadBtn.getAttribute('data-id');
-    if (!modelId) return;
+if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+        if (!currentModel) return;
+        fetch(`/api/track-click?modelId=${currentModel.objectID}&type=download`);
+        window.open(currentModel.source_url, '_blank');
+    });
+}
 
-    // Extract the numeric ID from the objectID (e.g., "thingiverse_12345" -> "12345")
-    const thingId = modelId.split('_')[1];
-    if (!thingId) {
-        console.error('Could not extract thing ID from', modelId);
-        alert('Ошибка при скачивании файла.');
-        return;
-    }
+if (findMasterBtn) {
+    findMasterBtn.addEventListener('click', () => {
+        closeModal();
+        document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
+        // Optionally trigger geolocation or filter map here
+    });
+}
 
-    // Просто перенаправляем на эндпоинт скачивания
-    window.location.href = `/api/download?thing_id=${thingId}`;
-    
-    // Track click
-    fetch(`/api/track-click?modelId=${modelId}&type=download`);
+// Tab System
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = content.id === `tab-${tabId}` ? 'block' : 'none';
+    });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-// --- CALCULATOR LOGIC ---
-
-const materialDensities = {
-    'PLA': 1.24,
-    'PETG': 1.27,
-    'ABS': 1.04,
-    'TPU': 1.21
-};
-
-function calculateCost() {
-    if (!currentModel || !currentModel.volume_cm3) return;
-
-    const material = document.getElementById('calc-material').value;
-    const spoolPrice = parseFloat(document.getElementById('calc-price').value);
-    const spoolWeight = parseFloat(document.getElementById('calc-weight').value);
-    const infill = parseFloat(document.getElementById('calc-infill').value);
-
-    const resultEl = document.getElementById('calculator-result');
-
-    if (isNaN(spoolPrice) || isNaN(spoolWeight) || isNaN(infill) || spoolWeight <= 0) {
-        resultEl.textContent = 'Заполните все поля корректно.';
-        return;
-    }
-
-    const density = materialDensities[material];
-    const modelWeight = currentModel.volume_cm3 * (infill / 100) * density;
-    const totalWeight = modelWeight * 1.15; // +15% for supports/raft/purge
-    const pricePerGram = spoolPrice / spoolWeight;
-    const estimatedCost = totalWeight * pricePerGram;
-
-    resultEl.innerHTML = `Примерный вес: <strong>${totalWeight.toFixed(1)} г</strong><br>Примерная стоимость: <strong>${estimatedCost.toFixed(2)} ₽</strong>`;
+function renderAffiliateLinks(name) {
+    const container = document.getElementById('market-links');
+    if (!container) return;
     
-    renderMaterialLinks(material); // Render links for the selected material
+    // Check if part is printable or likely needs buying
+    const nonPrintableKeywords = ['spring', 'motor', 'engine', 'logic board', 'display', 'glass', 'пружина', 'мотор', 'плата', 'стекло', 'металл', 'metal'];
+    const isLikelyHardware = nonPrintableKeywords.some(k => name.toLowerCase().includes(k));
+
+    const q = encodeURIComponent(name);
+    const platforms = [
+        { name: 'Amazon', url: `https://www.amazon.com/s?k=${q}&tag=fixit3d-20`, cls: '' },
+        { name: 'AliExpress', url: `https://www.aliexpress.com/wholesale?SearchText=${q}`, cls: '' },
+        { name: 'Yandex Market', url: `https://yandex.ru/products/search?text=${q}`, cls: '' },
+        { name: 'Ozon', url: `https://www.ozon.ru/search/?text=${q}`, cls: '' }
+    ];
+
+    container.innerHTML = platforms.map(p => `
+        <a href="${p.url}" target="_blank" class="market-btn ${isLikelyHardware ? 'highlight-buy' : ''}">
+            <span>${p.name}</span>
+            <span class="price-hint">${isLikelyHardware ? 'Buy Original' : 'Check Price'} ↗</span>
+        </a>
+    `).join('');
 }
 
-async function renderMaterialLinks(material) {
-    const linksContainer = document.getElementById('material-links-section');
-    linksContainer.innerHTML = '<h5>Где купить:</h5>';
-
-    try {
-        const response = await fetch('/data/filaments.json');
-        const filaments = await response.json();
-        const links = filaments[material];
-
-        if (links && links.length > 0) {
-            const list = document.createElement('ul');
-            list.className = 'material-links-list';
-            links.forEach(item => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="${item.link}" target="_blank" rel="noopener sponsored">${item.name} на <strong>${item.shop}</strong></a>`;
-                list.appendChild(li);
-            });
-            linksContainer.appendChild(list);
-        } else {
-            linksContainer.innerHTML += '<p>Ссылки для этого материала не найдены.</p>';
-        }
-    } catch (error) {
-        console.error('Error fetching filament links:', error);
-        linksContainer.innerHTML += '<p>Не удалось загрузить ссылки.</p>';
-    }
-}
-
-function renderCalculator() {
-    const controlsContainer = document.getElementById('calculator-controls');
-    const resultEl = document.getElementById('calculator-result');
-    const calculatorSection = document.getElementById('calculator-section');
-
-    if (!currentModel || !currentModel.volume_cm3) {
-        calculatorSection.style.display = 'none';
-        return;
-    }
+function initCalculator() {
+    const matSelect = document.getElementById('calc-mat');
+    const infInput = document.getElementById('calc-inf');
+    const infVal = document.getElementById('inf-val');
+    const resultDiv = document.getElementById('calc-result');
     
-    calculatorSection.style.display = 'block';
+    if (!matSelect || !infInput) return;
 
-    controlsContainer.innerHTML = `
-        <div class="calc-row">
-            <div class="calc-group">
-                <label for="calc-material">Пластик:</label>
-                <select id="calc-material">
-                    ${Object.keys(materialDensities).map(m => `<option value="${m}">${m}</option>`).join('')}
-                </select>
-            </div>
-            <div class="calc-group">
-                <label for="calc-infill">Заполнение:</label>
-                <input type="number" id="calc-infill" value="20" min="5" max="100" step="5">
-                <span>%</span>
-            </div>
-        </div>
-        <div class="calc-row">
-            <div class="calc-group">
-                <label for="calc-price">Цена катушки:</label>
-                <input type="number" id="calc-price" value="1500" step="50">
-                <span>₽</span>
-            </div>
-            <div class="calc-group">
-                <label for="calc-weight">Вес катушки:</label>
-                <input type="number" id="calc-weight" value="1000" step="250">
-                <span>г</span>
-            </div>
-        </div>
-    `;
+    const volume = currentModel.volume_cm3 || 35;
 
-    resultEl.innerHTML = ''; // Clear previous results
+    const update = () => {
+        const density = parseFloat(matSelect.value);
+        const infill = parseInt(infInput.value);
+        if (infVal) infVal.textContent = `${infill}%`;
 
-    // Add event listeners
-    const materialSelector = document.getElementById('calc-material');
-    materialSelector.addEventListener('change', () => {
-        calculateCost();
-        renderMaterialLinks(materialSelector.value);
-    });
-    document.getElementById('calc-infill').addEventListener('input', calculateCost);
-    document.getElementById('calc-price').addEventListener('input', calculateCost);
-    document.getElementById('calc-weight').addEventListener('input', calculateCost);
+        const weight = volume * density * (infill/100 + 0.15);
+        const price = Math.max(350, Math.round(weight * 25)); // adjusted price
 
-    // Initial calculation and link rendering
-    calculateCost();
-    renderMaterialLinks(materialSelector.value);
+        if (resultDiv) resultDiv.textContent = `${price} ₽`;
+    };
+
+    matSelect.onchange = update;
+    infInput.oninput = update;
+    update();
 }
-

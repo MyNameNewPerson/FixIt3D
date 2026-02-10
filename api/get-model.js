@@ -1,4 +1,5 @@
-// api/get-model.js
+import fetch from 'node-fetch';
+
 export default async function handler(req, res) {
   let { url } = req.query;
 
@@ -11,17 +12,19 @@ export default async function handler(req, res) {
     url = `http://localhost:3000${url}`;
   }
 
+  console.log(`[get-model] Proxying request for: ${url}`);
+
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Failed to fetch model from ${url}. Status: ${response.status}`);
     }
 
-    // Get the content type from the original response
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     res.setHeader('Content-Type', contentType);
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
-    // Stream the response body to the client
+    // node-fetch v2/v3 body is a Node.js Readable stream
     response.body.pipe(res);
 
   } catch (error) {

@@ -1,40 +1,56 @@
 // public/scripts/search.js
+import { getTranslation, getCurrentLanguage, setLanguage } from './i18n.js';
 
 let currentQuery = '';
 let currentBrand = '';
+let currentMode = 'spare-parts'; // 'spare-parts' or 'hobby'
+let currentPage = 1;
+
+const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko'];
+const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home', 'Decor', 'Cosplay', 'Art'];
 
 async function searchModels(query = '', brand = '', page = 1) {
     const grid = document.getElementById('models-grid');
-    grid.innerHTML = '<div class="skeleton-card"></div>'.repeat(6); // Show more skeletons
+    if (!grid) return;
+    grid.innerHTML = '<div class="card-skeleton"></div>'.repeat(8);
 
     currentQuery = query;
     currentBrand = brand;
+    currentPage = page;
 
     try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&page=${page}&per_page=18`);
+        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&brand=${encodeURIComponent(brand)}&mode=${currentMode}&page=${page}&per_page=12`);
         const data = await response.json();
         renderResults(data);
-        
-        // Плавная прокрутка к сетке с моделями
-        if (page > 1) { // Прокручиваем только при смене страницы, а не при первой загрузке
-            document.getElementById('models-grid').scrollIntoView({ behavior: 'smooth' });
-        }
     } catch (error) {
         console.error('Search error:', error);
-        grid.innerHTML = '<p class="error">Ошибка загрузки моделей. Попробуйте позже.</p>';
+        grid.innerHTML = `<p class="error">${getTranslation('no-results')}</p>`;
     }
 }
 
 function renderResults({ hits, totalPages, currentPage, totalResults }) {
     const grid = document.getElementById('models-grid');
-    const resultsHeader = document.querySelector('.section-header h2');
+    const resultsCount = document.getElementById('results-count');
+    if (!grid || !resultsCount) return;
     grid.innerHTML = '';
 
-    resultsHeader.textContent = `Найдено моделей: ${totalResults || 0}`;
+    resultsCount.textContent = getTranslation('results-count', { count: totalResults.toLocaleString() });
+
+    const statsTotal = document.getElementById('stats-total');
+    if (statsTotal && totalResults > 0 && !currentQuery && !currentBrand) {
+        statsTotal.innerHTML = getTranslation('hero-stats', { count: totalResults.toLocaleString() });
+    }
 
     if (!hits || hits.length === 0) {
-        grid.innerHTML = '<p class="no-results">Модели не найдены. Попробуйте другой запрос.</p>';
-        document.getElementById('pagination-container').innerHTML = ''; // Clear pagination
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 60px 0;">
+                <h3 style="font-size: 24px; margin-bottom: 12px;">${getTranslation('no-results')}</h3>
+                <p style="color: var(--text-muted)">${getTranslation('no-results-sub')}</p>
+                <button id="reset-filters-btn" style="margin-top: 24px; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">${getTranslation('reset-filters')}</button>
+            </div>
+        `;
+        document.getElementById('reset-filters-btn')?.addEventListener('click', resetFilters);
+        document.getElementById('pagination-container').innerHTML = '';
         return;
     }
 
@@ -42,28 +58,25 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
         const card = document.createElement('div');
         card.className = 'model-card';
         card.innerHTML = `
-            <div class="model-card__image">
-                <img src="${model.image || 'https://via.placeholder.com/400x300?text=No+Image'}" alt="${model.name}" loading="lazy">
-                ${model.brand ? `<span class="brand-badge">${model.brand}</span>` : ''}
+            <div class="card-image">
+                <img src="${model.image || 'https://via.placeholder.com/400x300?text=FixIt3D'}" alt="${model.name}" loading="lazy" referrerpolicy="no-referrer">
+                ${model.brand ? `<span class="card-badge">${model.brand}</span>` : ''}
             </div>
-            <div class="model-card__content">
+            <div class="card-body">
                 <h3>${model.name}</h3>
-                <p class="author">От ${model.author}</p>
-                <div class="model-card__footer">
-                    <div class="popularity">⭐ ${model.popularity || 0}</div>
-                    <button class="btn-primary view-btn" data-id="${model.objectID}">Посмотреть</button>
+                <p class="card-author">${getTranslation('modal-author')}: ${model.author}</p>
+                <div class="card-footer">
+                    <span class="btn-card-action">Посмотреть →</span>
+                    <div class="card-popularity">⭐ ${model.popularity || 0}</div>
                 </div>
             </div>
         `;
-        grid.appendChild(card);
-    });
 
-    document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const modelId = btn.getAttribute('data-id');
-            const model = hits.find(h => h.objectID === modelId);
-            window.openModelModal(model);
+        card.addEventListener('click', () => {
+            if (window.openModelModal) window.openModelModal(model);
         });
+
+        grid.appendChild(card);
     });
 
     renderPagination(totalPages, currentPage);
@@ -71,86 +84,145 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
 
 function renderPagination(totalPages, currentPage) {
     const container = document.getElementById('pagination-container');
+    if (!container) return;
     container.innerHTML = '';
     if (totalPages <= 1) return;
 
-    const createPageLink = (page, text, disabled = false, active = false) => {
-        const li = document.createElement('li');
-        li.className = `page-item ${disabled ? 'disabled' : ''} ${active ? 'active' : ''}`;
-        const a = document.createElement('a');
-        a.className = 'page-link';
-        a.href = '#';
-        a.textContent = text;
-        if (!disabled) {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                searchModels(currentQuery, currentBrand, page);
-            });
-        }
-        li.appendChild(a);
-        return li;
-    };
+    const maxVisible = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, start + maxVisible - 1);
 
-    const ul = document.createElement('ul');
-    ul.className = 'pagination';
-
-    // Previous button
-    ul.appendChild(createPageLink(currentPage - 1, '‹', currentPage === 1));
-
-    // Page numbers
-    const maxPagesToShow = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    if(endPage - startPage < maxPagesToShow - 1) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    if (end - start < maxVisible - 1) {
+        start = Math.max(1, end - maxVisible + 1);
     }
 
-    if (startPage > 1) {
-        ul.appendChild(createPageLink(1, '1'));
-        if(startPage > 2) ul.appendChild(createPageLink(0, '...', true));
+    // Prev
+    if (currentPage > 1) {
+        const p = document.createElement('button');
+        p.className = 'page-btn'; p.textContent = '←';
+        p.onclick = () => searchModels(currentQuery, currentBrand, currentPage - 1);
+        container.appendChild(p);
     }
 
-    for (let i = startPage; i <= endPage; i++) {
-        ul.appendChild(createPageLink(i, i, false, i === currentPage));
-    }
-    
-    if (endPage < totalPages) {
-        if(endPage < totalPages - 1) ul.appendChild(createPageLink(0, '...', true));
-        ul.appendChild(createPageLink(totalPages, totalPages));
+    for (let i = start; i <= end; i++) {
+        const btn = document.createElement('button');
+        btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+        btn.textContent = i;
+        btn.addEventListener('click', () => {
+            searchModels(currentQuery, currentBrand, i);
+            document.getElementById('models-section').scrollIntoView({ behavior: 'smooth' });
+        });
+        container.appendChild(btn);
     }
 
-    // Next button
-    ul.appendChild(createPageLink(currentPage + 1, '›', currentPage === totalPages));
-
-    container.appendChild(ul);
+    // Next
+    if (currentPage < totalPages) {
+        const n = document.createElement('button');
+        n.className = 'page-btn'; n.textContent = '→';
+        n.onclick = () => searchModels(currentQuery, currentBrand, currentPage + 1);
+        container.appendChild(n);
+    }
 }
 
+function updateBrandFilters() {
+    const container = document.getElementById('brand-filters');
+    if (!container) return;
+    container.innerHTML = `<button class="filter-chip active" data-brand="">${getTranslation('all-brands')}</button>`;
+    
+    const brands = currentMode === 'spare-parts' ? SPARE_PARTS_BRANDS : HOBBY_BRANDS;
 
-// Initial search
+    brands.forEach(brand => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-chip';
+        btn.setAttribute('data-brand', brand);
+        btn.textContent = brand;
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            searchModels(currentQuery, brand);
+        });
+        container.appendChild(btn);
+    });
+}
+
+window.resetFilters = function() {
+    const input = document.getElementById('search-input');
+    if (input) input.value = '';
+    searchModels('', '');
+    updateBrandFilters();
+};
+
+function switchMode(mode) {
+    currentMode = mode;
+    document.body.className = mode + '-mode';
+
+    // Update active buttons in UI
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+
+    const mainTitle = document.getElementById('main-title');
+    const mainSubtitle = document.getElementById('main-subtitle');
+    const catalogTitle = document.getElementById('catalog-title');
+
+    if (mode === 'hobby') {
+        if (mainTitle) mainTitle.innerHTML = getTranslation('hobby-hero-title');
+        if (mainSubtitle) mainSubtitle.textContent = getTranslation('hobby-hero-subtitle');
+        if (catalogTitle) catalogTitle.textContent = getTranslation('catalog-title-hobby');
+    } else {
+        if (mainTitle) mainTitle.innerHTML = getTranslation('hero-title');
+        if (mainSubtitle) mainSubtitle.textContent = getTranslation('hero-subtitle');
+        if (catalogTitle) catalogTitle.textContent = getTranslation('catalog-title-spare');
+    }
+
+    currentBrand = '';
+    updateBrandFilters();
+    searchModels('', '');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Initial load
+    updateBrandFilters();
     searchModels();
 
+    // Search inputs
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
 
-    searchBtn.addEventListener('click', () => {
-        searchModels(searchInput.value, ''); // Reset brand on new text search
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('.filter-btn[data-brand=""]').classList.add('active');
+    if (searchBtn && searchInput) {
+        searchBtn.addEventListener('click', () => searchModels(searchInput.value, ''));
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
+    }
+
+    // Mode Switch UI
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            searchBtn.click();
-        }
-    });
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const brand = btn.getAttribute('data-brand');
-            searchModels(searchInput.value, brand);
+    // Tag clicks
+    document.querySelectorAll('.search-tag').forEach(tag => {
+        tag.addEventListener('click', (e) => {
+            e.preventDefault();
+            searchInput.value = tag.textContent;
+            searchModels(tag.textContent, '');
         });
     });
+
+    // Language Toggle
+    const langToggle = document.getElementById('lang-toggle');
+    if (langToggle) {
+        langToggle.textContent = getCurrentLanguage().toUpperCase();
+        langToggle.addEventListener('click', () => {
+            const nextLang = getCurrentLanguage() === 'ru' ? 'en' : 'ru';
+            setLanguage(nextLang);
+            langToggle.textContent = nextLang.toUpperCase();
+        });
+    }
+});
+
+// Listen for language changes to refresh dynamic content
+window.addEventListener('languageChanged', () => {
+    searchModels(currentQuery, currentBrand, currentPage);
+    updateBrandFilters();
+    switchMode(currentMode);
 });

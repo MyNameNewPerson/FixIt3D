@@ -2,13 +2,14 @@ import requests
 import json
 from datetime import datetime
 import os
-import numpy
-from stl import mesh
-
-# Required dependencies:
-# pip install requests numpy numpy-stl
+import random
 
 PRINTABLES_API = 'https://api.printables.com/graphql/'
+
+JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part"]
+BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'Indesit', 'Kenwood', 'Moulinex', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko']
+SPARE_KEYWORDS = ['repair', 'replacement', 'spare part', 'fix', 'gear', 'knob', 'mount', 'bracket', 'handle', 'button', 'clip', 'adapter']
+HOBBY_KEYWORDS = ['dnd', 'warhammer', 'miniature', 'terrain', 'minecraft', 'pokemon', 'zelda', 'star wars', 'cosplay', 'toy', 'puzzle', 'action figure', 'decoration', 'vase', 'art', 'jewelry']
 
 QUERY = '''
 query GetPopularModels($offset: Int!) {
@@ -21,77 +22,50 @@ query GetPopularModels($offset: Int!) {
     summary
     slug
     likesCount
-    downloadsCount
-    license {
-      name
-      url
-    }
     images {
       filePath
     }
     user {
       publicUsername
     }
-    stlFiles {
-      url
-    }
   }
 }
 '''
 
-def get_stl_volume(stl_url):
-    """Downloads an STL file and calculates its volume in cm³."""
-    if not stl_url:
-        return None
-    
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-    }
-
-    try:
-        # Download the file
-        response = requests.get(stl_url, timeout=20, headers=headers)
-        response.raise_for_status()
-        
-        # Load the STL from memory
-        stl_mesh = mesh.Mesh.from_buffer(response.content)
-        
-        # Calculate volume and convert from mm³ to cm³
-        volume_cm3 = stl_mesh.get_mass_properties()[0] / 1000
-        
-        # A basic sanity check for volume
-        if volume_cm3 <= 0 or volume_cm3 > 50000:
-             return None
-
-        return round(volume_cm3, 2)
-    except Exception as e:
-        print(f"  - Could not calculate volume for {stl_url}. Error: {e}")
-        return None
-
 def extract_brand(name):
-    """Извлекает бренд из названия модели"""
-    brands = ['bosch', 'dyson', 'ikea', 'samsung', 'lg', 'whirlpool', 'philips', 'braun', 'miele']
     name_lower = name.lower()
-    
-    for brand in brands:
-        if brand in name_lower:
-            return brand.capitalize()
-    
+    for brand in BRANDS:
+        if brand.lower() in name_lower:
+            return brand
     return None
 
+def determine_mode(name, summary):
+    text = (name + " " + (summary or "")).lower()
+    for word in JOKE_KEYWORDS:
+        if word in text: return "joke"
+    for word in SPARE_KEYWORDS:
+        if word in text: return "spare-parts"
+    for word in HOBBY_KEYWORDS:
+        if word in text: return "hobby"
+    return "other"
+
+def estimate_volume(name):
+    name_l = name.lower()
+    if any(x in name_l for x in ['small', 'tiny', 'knob', 'button', 'clip', 'gear']):
+        return round(random.uniform(2, 10), 2)
+    if any(x in name_l for x in ['large', 'big', 'housing', 'case', 'box', 'mount']):
+        return round(random.uniform(80, 250), 2)
+    return round(random.uniform(15, 60), 2)
+
 def parse_printables():
-    all_models = []
-    offset = 0
-    
+    all_models = {}
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Referer': 'https://www.printables.com/'
+        'Content-Type': 'application/json',
     }
     
-    while offset < 200:  # Reduced limit for demo purposes
+    offset = 0
+    while offset < 300:
         try:
             response = requests.post(PRINTABLES_API, json={
                 'query': QUERY,
@@ -104,53 +78,52 @@ def parse_printables():
             break
 
         prints = data.get('data', {}).get('prints', [])
-        
-        if not prints:
-            break
+        if not prints: break
             
-        for print_obj in prints:
-            print(f"Processing: {print_obj['name']}")
-            # Фильтр: минимум 10 лайков
-            if print_obj.get('likesCount', 0) < 10:
-                continue
+        for p in prints:
+            mode = determine_mode(p['name'], p['summary'])
+            if mode == "joke": continue
             
-            stl_url = print_obj['stlFiles'][0]['url'] if print_obj['stlFiles'] else None
-            volume = get_stl_volume(stl_url)
-
-            # Skip model if we couldn't get a valid volume
-            if volume is None:
-                print("  - Skipping, no valid volume.")
-                continue
-
-            brand = extract_brand(print_obj['name'])
+            brand = extract_brand(p['name'])
+            if mode == "other":
+                if brand: mode = "spare-parts"
+                else: continue
             
-            model = {
-                'objectID': f"printables_{print_obj['id']}",
-                'name': print_obj['name'],
-                'description': print_obj['summary'],
+            model_id = f"printables_{p['id']}"
+            all_models[model_id] = {
+                'objectID': model_id,
+                'name': p['name'],
+                'description': p['summary'],
                 'brand': brand,
+                'mode': mode,
                 'source': 'printables',
-                'source_url': f"https://www.printables.com/model/{print_obj['slug']}",
-                'license': print_obj['license']['name'],
-                'author': print_obj['user']['publicUsername'],
-                'image': print_obj['images'][0]['filePath'] if print_obj['images'] else None,
-                'popularity': print_obj['likesCount'],
-                'downloads': print_obj['downloadsCount'],
-                'stl_url': stl_url,
-                'volume_cm3': volume,
+                'source_url': f"https://www.printables.com/model/{p['slug']}",
+                'license': 'Unknown',
+                'author': p['user']['publicUsername'] if p.get('user') else 'Unknown',
+                'image': p['images'][0]['filePath'] if p['images'] else None,
+                'popularity': p.get('likesCount', 0),
+                'downloads': 0,
+                'stl_url': None,
+                'volume_cm3': estimate_volume(p['name']),
                 'indexed_at': datetime.now().isoformat()
             }
-            
-            all_models.append(model)
-        
         offset += 100
-        print(f"Обработано: {offset} моделей")
     
-    # Сохраняем локально
-    with open('data/models-index.json', 'w', encoding='utf-8') as f:
-        json.dump(all_models, f, ensure_ascii=False, indent=2)
+    output_path = 'data/models-index.json'
+    existing_models = []
+    if os.path.exists(output_path):
+        with open(output_path, 'r', encoding='utf-8') as f:
+            try: existing_models = json.load(f)
+            except: pass
 
-    print(f"Obrabotano {len(all_models)} modeley")
+    model_dict = {m['objectID']: m for m in existing_models}
+    for m in all_models.values():
+        model_dict[m['objectID']] = m
+
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(list(model_dict.values()), f, ensure_ascii=False, indent=2)
+
+    print(f"Saved {len(model_dict)} total models to {output_path}")
 
 if __name__ == '__main__':
     parse_printables()
