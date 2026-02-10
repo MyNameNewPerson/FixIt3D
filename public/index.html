@@ -37,7 +37,7 @@
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/styles/main.css">
 
@@ -58,24 +58,25 @@
                 </div>
             </a>
 
-            <div class="header-nav">
-                <div class="mode-switch-wrapper">
-                    <div class="mode-switch" id="mode-switch-ui">
-                        <button class="mode-btn active" data-mode="spare-parts" data-i18n="mode-spare">Запчасти</button>
-                        <button class="mode-btn" data-mode="hobby" data-i18n="mode-hobby">Хобби</button>
-                    </div>
+            <div class="header-center">
+                <div class="mode-switch" id="mode-switch-ui">
+                    <button class="mode-btn active" data-mode="spare-parts" data-i18n="mode-spare">Запчасти</button>
+                    <button class="mode-btn" data-mode="hobby" data-i18n="mode-hobby">Хобби</button>
                 </div>
-
-                <nav class="desktop-nav">
+                <nav class="main-nav">
                     <a href="#models-section" data-i18n="nav-catalog">Каталог</a>
                     <a href="#map-section" data-i18n="nav-map">Карта мастеров</a>
-
-                    <div class="lang-switch">
-                        <button class="lang-btn" id="lang-toggle">RU</button>
-                    </div>
-
-                    <a href="#" class="btn-cta" data-i18n="nav-add">Добавить модель</a>
                 </nav>
+            </div>
+
+            <div class="header-right">
+                <div class="lang-toggle-modern" id="lang-toggle-modern">
+                    <button class="lang-link active" data-lang="ru">RU</button>
+                    <span class="lang-divider">|</span>
+                    <button class="lang-link" data-lang="en">EN</button>
+                </div>
+
+                <a href="#" class="btn-cta" data-i18n="nav-add">Добавить модель</a>
             </div>
         </div>
     </header>
@@ -97,12 +98,9 @@
                             <input type="text" id="search-input" data-i18n="hero-search-placeholder" placeholder="Например: шестерня для Bosch Maxx 7">
                             <button id="search-btn" data-i18n="hero-search-btn">Найти модель</button>
                         </div>
-                        <div class="search-tags">
+                        <div class="search-tags" id="popular-tags">
                             <span data-i18n="hero-popular">Популярно:</span>
-                            <a href="#" class="search-tag">Bosch</a>
-                            <a href="#" class="search-tag">Dyson</a>
-                            <a href="#" class="search-tag">Шестерня</a>
-                            <a href="#" class="search-tag">Samsung</a>
+                            <!-- Tags injected by search.js -->
                         </div>
                     </div>
                 </div>
@@ -161,15 +159,15 @@
                 <div class="section-card">
                     <div class="section-header-row">
                         <div class="header-text">
-                            <h2>Карта мастеров 3D-печати</h2>
-                            <p>Найдите ближайшего специалиста, если у вас нет своего принтера</p>
+                            <h2 data-i18n="map-title">Карта мастеров 3D-печати</h2>
+                            <p data-i18n="map-subtitle">Найдите ближайшего специалиста, если у вас нет своего принтера</p>
                         </div>
-                        <a href="/masters/join" class="btn-outline">Стать мастером</a>
+                        <a href="/masters/join" class="btn-outline" data-i18n="map-join">Стать мастером</a>
                     </div>
                     <div class="map-container-layout">
                         <div class="map-sidebar">
                             <div class="location-search">
-                                <input type="text" placeholder="Ваш город..." id="map-city-search">
+                                <input type="text" data-i18n="map-city-placeholder" placeholder="Ваш город..." id="map-city-search">
                             </div>
                             <div id="masters-list" class="masters-mini-list">
                                 <!-- List of closest masters -->
@@ -202,27 +200,27 @@
                     <div class="footer-col">
                         <h4 data-i18n="footer-cat-title">Категории</h4>
                         <ul id="footer-categories">
-                            <li><a href="#">Бытовая техника</a></li>
-                            <li><a href="#">Электроника</a></li>
-                            <li><a href="#">Автотовары</a></li>
-                            <li><a href="#">Дом и Сад</a></li>
+                            <li><a href="#" data-i18n="footer-cat-appliances">Бытовая техника</a></li>
+                            <li><a href="#" data-i18n="footer-cat-electronics">Электроника</a></li>
+                            <li><a href="#" data-i18n="footer-cat-auto">Автотовары</a></li>
+                            <li><a href="#" data-i18n="footer-cat-home">Дом и Сад</a></li>
                         </ul>
                     </div>
                     <div class="footer-col">
                         <h4 data-i18n="footer-about-title">О проекте</h4>
                         <ul>
-                            <li><a href="#">Как это работает</a></li>
-                            <li><a href="/masters/join">Для мастеров</a></li>
-                            <li><a href="/legal/dmca.html">DMCA</a></li>
-                            <li><a href="/legal/privacy.html">Privacy Policy</a></li>
+                            <li><a href="#" data-i18n="footer-how">Как это работает</a></li>
+                            <li><a href="/masters/join" data-i18n="footer-for-masters">Для мастеров</a></li>
+                            <li><a href="/legal/dmca.html" data-i18n="footer-dmca">DMCA</a></li>
+                            <li><a href="/legal/privacy.html" data-i18n="footer-privacy">Privacy Policy</a></li>
                         </ul>
                     </div>
                     <div class="footer-col">
                         <h4 data-i18n="footer-help-title">Помощь</h4>
                         <ul>
-                            <li><a href="#">FAQ</a></li>
-                            <li><a href="#">Обратная связь</a></li>
-                            <li><a href="#">Донаты</a></li>
+                            <li><a href="#" data-i18n="footer-faq">FAQ</a></li>
+                            <li><a href="#" data-i18n="footer-feedback">Обратная связь</a></li>
+                            <li><a href="#" data-i18n="footer-donations">Донаты</a></li>
                         </ul>
                     </div>
                 </div>
@@ -295,9 +293,9 @@
                                     <div class="calc-row">
                                         <label data-i18n="calc-plastic">Пластик:</label>
                                         <select id="calc-mat">
-                                            <option value="1.24">PLA (Декор)</option>
-                                            <option value="1.27">PETG (Функционал)</option>
-                                            <option value="1.04">ABS (Термостойкий)</option>
+                                            <option value="1.24" data-i18n="calc-pla">PLA (Декор)</option>
+                                            <option value="1.27" data-i18n="calc-petg">PETG (Прочный)</option>
+                                            <option value="1.04" data-i18n="calc-abs">ABS (Термостойкий)</option>
                                         </select>
                                     </div>
                                     <div class="calc-row">

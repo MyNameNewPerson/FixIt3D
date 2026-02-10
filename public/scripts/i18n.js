@@ -11,6 +11,8 @@ const translations = {
         "hero-search-btn": "Найти модель",
         "hero-popular": "Популярно:",
         "hero-stats": "{count} модель доступна сегодня",
+        "meta-title": "FixIt3D | База 3D-моделей для ремонта и хобби",
+        "meta-description": "Найдите 3D-модели редких запчастей для Bosch, Dyson, Samsung и других брендов. Огромный каталог STL файлов для печати и хобби.",
         "hero-card-repair-title": "Ремонт Bosch",
         "hero-card-repair-sub": "Скидка 80% от цены новой детали",
         "hero-card-hobby-title": "Хобби и Игры",
@@ -19,6 +21,7 @@ const translations = {
         "catalog-title-hobby": "Каталог хобби-моделей",
         "results-count": "{count} моделей",
         "all-brands": "Все бренды",
+        "tag-gear": "Шестерня",
         "footer-about": "Мы строим будущее без свалок. Продлеваем жизнь вещам через доступность технологий 3D-печати.",
         "footer-cat-title": "Категории",
         "footer-about-title": "О проекте",
@@ -38,9 +41,16 @@ const translations = {
         "order-btn": "Найти",
         "buy-hint": "Если печать невозможна, поищите оригинал или аналог:",
         "calc-plastic": "Пластик:",
+        "calc-pla": "PLA (Декор)",
+        "calc-petg": "PETG (Прочный)",
+        "calc-abs": "ABS (Термостойкий)",
         "calc-infill": "Заполнение:",
         "calc-estimate": "Ориентировочная цена:",
+        "calc-currency": "₽",
         "source-link": "Посмотреть на оригинале ↗",
+        "buy-original": "Купить оригинал",
+        "check-price": "Узнать цену",
+        "view-details": "Посмотреть →",
 
         // Search Results
         "no-results": "Ничего не найдено",
@@ -53,7 +63,26 @@ const translations = {
 
         // Hobby Mode Hero
         "hobby-hero-title": "Создавайте <span class=\"text-gradient\">шедевры</span> сами",
-        "hobby-hero-subtitle": "Тысячи моделей для хобби, игр и декора. От настольных миниатюр до интерьерных решений."
+        "hobby-hero-subtitle": "Тысячи моделей для хобби, игр и декора. От настольных миниатюр до интерьерных решений.",
+
+        // Map
+        "map-title": "Карта мастеров 3D-печати",
+        "map-subtitle": "Найдите ближайшего специалиста, если у вас нет своего принтера",
+        "map-join": "Стать мастером",
+        "map-city-placeholder": "Ваш город...",
+
+        // Footer Cats
+        "footer-cat-appliances": "Бытовая техника",
+        "footer-cat-electronics": "Электроника",
+        "footer-cat-auto": "Автотовары",
+        "footer-cat-home": "Дом и Сад",
+        "footer-how": "Как это работает",
+        "footer-for-masters": "Для мастеров",
+        "footer-dmca": "DMCA",
+        "footer-privacy": "Конфиденциальность",
+        "footer-faq": "FAQ",
+        "footer-feedback": "Обратная связь",
+        "footer-donations": "Донаты"
     },
     en: {
         "nav-catalog": "Catalog",
@@ -65,6 +94,8 @@ const translations = {
         "hero-search-btn": "Find Model",
         "hero-popular": "Popular:",
         "hero-stats": "{count} models available today",
+        "meta-title": "FixIt3D | 3D Models for Repair & Hobby",
+        "meta-description": "Find 3D models of rare spare parts for Bosch, Dyson, Samsung and other brands. Huge catalog of STL files for printing and hobby.",
         "hero-card-repair-title": "Bosch Repair",
         "hero-card-repair-sub": "80% cheaper than a new part",
         "hero-card-hobby-title": "Hobby & Games",
@@ -73,6 +104,7 @@ const translations = {
         "catalog-title-hobby": "Hobby Model Catalog",
         "results-count": "{count} models",
         "all-brands": "All Brands",
+        "tag-gear": "Gear",
         "footer-about": "We build a future without landfills. Extending the life of things through accessible 3D printing.",
         "footer-cat-title": "Categories",
         "footer-about-title": "About Project",
@@ -92,9 +124,16 @@ const translations = {
         "order-btn": "Find",
         "buy-hint": "If printing is not possible, look for the original or analog:",
         "calc-plastic": "Plastic:",
+        "calc-pla": "PLA (Decor)",
+        "calc-petg": "PETG (Durable)",
+        "calc-abs": "ABS (Heat-resistant)",
         "calc-infill": "Infill:",
         "calc-estimate": "Estimated price:",
+        "calc-currency": "$",
         "source-link": "View on original ↗",
+        "buy-original": "Buy Original",
+        "check-price": "Check Price",
+        "view-details": "View Details →",
 
         // Search Results
         "no-results": "Nothing found",
@@ -107,7 +146,26 @@ const translations = {
 
         // Hobby Mode Hero
         "hobby-hero-title": "Create <span class=\"text-gradient\">masterpieces</span> yourself",
-        "hobby-hero-subtitle": "Thousands of models for hobbies, games, and decor. From tabletop miniatures to interior solutions."
+        "hobby-hero-subtitle": "Thousands of models for hobbies, games, and decor. From tabletop miniatures to interior solutions.",
+
+        // Map
+        "map-title": "3D Printing Masters Map",
+        "map-subtitle": "Find a local specialist if you don't have your own printer",
+        "map-join": "Join as Master",
+        "map-city-placeholder": "Your city...",
+
+        // Footer Cats
+        "footer-cat-appliances": "Appliances",
+        "footer-cat-electronics": "Electronics",
+        "footer-cat-auto": "Auto Parts",
+        "footer-cat-home": "Home & Garden",
+        "footer-how": "How it works",
+        "footer-for-masters": "For Masters",
+        "footer-dmca": "DMCA",
+        "footer-privacy": "Privacy Policy",
+        "footer-faq": "FAQ",
+        "footer-feedback": "Feedback",
+        "footer-donations": "Donations"
     }
 };
 
@@ -146,6 +204,11 @@ export function applyTranslations() {
             el.innerHTML = translation;
         }
     });
+
+    // SEO
+    document.title = getTranslation('meta-title');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', getTranslation('meta-description'));
 
     // Update lang attribute
     document.documentElement.lang = currentLang;

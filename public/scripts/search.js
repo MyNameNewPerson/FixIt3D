@@ -66,7 +66,7 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
                 <h3>${model.name}</h3>
                 <p class="card-author">${getTranslation('modal-author')}: ${model.author}</p>
                 <div class="card-footer">
-                    <span class="btn-card-action">Посмотреть →</span>
+                    <span class="btn-card-action">${getTranslation('view-details')}</span>
                     <div class="card-popularity">⭐ ${model.popularity || 0}</div>
                 </div>
             </div>
@@ -152,6 +152,39 @@ window.resetFilters = function() {
     updateBrandFilters();
 };
 
+function updatePopularTags() {
+    const container = document.getElementById('popular-tags');
+    if (!container) return;
+
+    const label = document.createElement('span');
+    label.setAttribute('data-i18n', 'hero-popular');
+    label.textContent = getTranslation('hero-popular');
+
+    container.innerHTML = '';
+    container.appendChild(label);
+
+    const tags = currentMode === 'spare-parts'
+        ? ['Bosch', 'Dyson', getTranslation('tag-gear'), 'Samsung']
+        : ['D&D', 'Warhammer', 'Marvel', 'Pokemon'];
+
+    tags.forEach(t => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'search-tag';
+        a.textContent = t;
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('search-input');
+            if (input) {
+                input.value = t;
+                searchModels(t, '');
+            }
+        });
+        container.appendChild(document.createTextNode(' '));
+        container.appendChild(a);
+    });
+}
+
 function switchMode(mode) {
     currentMode = mode;
     document.body.className = mode + '-mode';
@@ -176,12 +209,14 @@ function switchMode(mode) {
     }
 
     currentBrand = '';
+    updatePopularTags();
     updateBrandFilters();
     searchModels('', '');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initial load
+    updatePopularTags();
     updateBrandFilters();
     searchModels();
 
@@ -209,13 +244,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Language Toggle
-    const langToggle = document.getElementById('lang-toggle');
-    if (langToggle) {
-        langToggle.textContent = getCurrentLanguage().toUpperCase();
-        langToggle.addEventListener('click', () => {
-            const nextLang = getCurrentLanguage() === 'ru' ? 'en' : 'ru';
-            setLanguage(nextLang);
-            langToggle.textContent = nextLang.toUpperCase();
+    const langToggleContainer = document.getElementById('lang-toggle-modern');
+    if (langToggleContainer) {
+        const updateLangUI = (lang) => {
+            langToggleContainer.querySelectorAll('.lang-link').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+        };
+
+        updateLangUI(getCurrentLanguage());
+
+        langToggleContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.lang-link');
+            if (btn) {
+                const lang = btn.dataset.lang;
+                setLanguage(lang);
+                updateLangUI(lang);
+            }
         });
     }
 });

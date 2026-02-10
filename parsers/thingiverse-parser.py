@@ -12,7 +12,17 @@ APP_TOKEN = "53dba3cff3fbbf0506e34d7fa855f40e"
 
 THINGIVERSE_API = 'https://api.thingiverse.com'
 
-JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part"]
+JOKE_KEYWORDS = [
+    "joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part",
+    "keychain", "logo", "decoration", "figurine", "statue", "ornament", "fan art", "toy", "miniature", "sign",
+    "display", "stand", "desktop", "accessory", "charm", "pendant", "wall art", "poster", "non-functional"
+]
+
+FUNCTIONAL_KEYWORDS = [
+    "gear", "knob", "handle", "bracket", "clip", "button", "lever", "mount", "adapter", "joint", "wheel",
+    "shaft", "seal", "gasket", "spring", "latch", "hinge", "cap", "plug", "cover", "base", "housing", "shell",
+    "replacement", "repair", "fix", "part"
+]
 
 SPARE_PARTS_QUERIES = {
     'Bosch': ['Bosch+spare+part', 'Bosch+repair'],
@@ -45,16 +55,24 @@ HOBBY_QUERIES = {
     'Home': ['decoration', 'vase', 'art', 'jewelry', 'sculpture']
 }
 
-def is_joke(name, description):
+def is_joke(name, description, mode):
     text = (name + " " + (description or "")).lower()
+
     # Check for joke keywords
     for word in JOKE_KEYWORDS:
         if word in text:
             return True
     
-    # Check for non-functional descriptions if it's Bosch (user specifically mentioned Bosch jokes)
-    if "bosch" in text and any(x in text for x in ["funny", "laugh", "fake", "joke"]):
-        return True
+    # Mode-specific strict filtering
+    if mode == 'spare-parts':
+        # If it contains a major brand name but NO functional keywords, it's likely decoration
+        brands = ['bosch', 'dyson', 'samsung', 'lg', 'whirlpool', 'miele', 'ikea', 'kitchenaid']
+        contains_brand = any(b in text for b in brands)
+
+        if contains_brand:
+            has_functional = any(fk in text for fk in FUNCTIONAL_KEYWORDS)
+            if not has_functional:
+                return True # Decoration/Logo/Sign
 
     return False
 
@@ -89,7 +107,7 @@ def fetch_results(queries, mode, headers):
                     if not item.get('preview_image'):
                         continue
                     
-                    if is_joke(item['name'], item.get('description')):
+                    if is_joke(item['name'], item.get('description'), mode):
                         continue
 
                     brand = None

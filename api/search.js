@@ -4,7 +4,14 @@ import path from 'path';
 
 const BLACKLIST_WORDS = [
   'joke', 'meme', 'funny', 'gag', 'prank', 'fake', 'parody', 'shit', 'dumb', 'stupid',
-  'keychain', 'logo', 'decoration', 'figurine', 'statue', 'ornament', 'fan art'
+  'keychain', 'logo', 'decoration', 'figurine', 'statue', 'ornament', 'fan art',
+  'toy', 'miniature', 'sign', 'display', 'stand', 'desktop', 'accessory', 'charm'
+];
+
+const FUNCTIONAL_KEYWORDS = [
+    'gear', 'knob', 'handle', 'bracket', 'clip', 'button', 'lever', 'mount', 'adapter', 'joint', 'wheel',
+    'shaft', 'seal', 'gasket', 'spring', 'latch', 'hinge', 'cap', 'plug', 'cover', 'base', 'housing', 'shell',
+    'replacement', 'repair', 'fix', 'part'
 ];
 
 export default async function handler(req, res) {
@@ -26,10 +33,23 @@ export default async function handler(req, res) {
     if (mode === 'spare-parts') {
       filteredHits = filteredHits.filter(h => {
         const text = (h.name + ' ' + (h.description || '')).toLowerCase();
-        return !BLACKLIST_WORDS.some(word => text.includes(word));
+
+        // 1. Check blacklist
+        if (BLACKLIST_WORDS.some(word => text.includes(word))) return false;
+
+        // 2. Strict functional check for branded items
+        const brands = ['bosch', 'dyson', 'samsung', 'lg', 'whirlpool', 'miele', 'ikea', 'kitchenaid'];
+        const containsBrand = brands.some(b => text.includes(b));
+
+        if (containsBrand) {
+            const hasFunctional = FUNCTIONAL_KEYWORDS.some(fk => text.includes(fk));
+            if (!hasFunctional) return false;
+        }
+
+        return true;
       });
 
-      // Also ensure functional keywords if brand is mentioned
+      // Also ensure brand consistency if specified
       if (brand) {
         const brandL = brand.toLowerCase();
         filteredHits = filteredHits.filter(h => {

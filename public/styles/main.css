@@ -13,7 +13,7 @@
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --radius: 12px;
-    --container: 1200px;
+    --container: 1440px;
 }
 
 * {
@@ -23,7 +23,7 @@
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-main);
     line-height: 1.5;
@@ -85,7 +85,8 @@ a {
 .brand-icon svg { width: 24px; height: 24px; }
 
 .brand-name {
-    font-size: 24px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 26px;
     font-weight: 800;
     letter-spacing: -0.5px;
 }
@@ -99,77 +100,91 @@ a {
     text-transform: uppercase;
 }
 
-.header-nav {
+.header-center {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 48px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .mode-switch {
-    background: var(--border);
-    padding: 4px;
+    background: #f1f5f9;
+    padding: 5px;
     border-radius: 50px;
     display: flex;
-    gap: 4px;
+    gap: 2px;
 }
 
 .mode-btn {
     border: none;
     background: transparent;
-    padding: 8px 16px;
+    padding: 10px 24px;
     border-radius: 50px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-muted);
 }
 
 .mode-btn.active {
     background: white;
-    box-shadow: var(--shadow);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     color: var(--primary);
 }
 
-.desktop-nav {
+.main-nav {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
 }
 
-.lang-switch {
-    background: var(--bg-main);
-    border-radius: 10px;
-    padding: 2px;
-    display: flex;
-}
-
-.lang-btn {
-    background: transparent;
-    border: none;
-    padding: 6px 12px;
+.main-nav a {
     font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: 0.2s;
+    font-size: 15px;
     color: var(--text-muted);
+    transition: 0.2s;
 }
 
-.lang-btn.active {
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+.main-nav a:hover { color: var(--primary); }
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.lang-toggle-modern {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+.lang-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    transition: 0.2s;
+}
+
+.lang-link.active {
     color: var(--primary);
 }
 
-.lang-btn:hover:not(.active) { background: var(--border); }
-
-.desktop-nav a {
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--text-muted);
+.lang-link:hover:not(.active) {
+    color: var(--text-main);
 }
 
-.desktop-nav a:hover { color: var(--primary); }
+.lang-divider {
+    color: var(--border);
+    font-weight: 400;
+}
 
 .btn-cta {
     background: var(--primary);
@@ -225,10 +240,11 @@ a {
 }
 
 .hero-text h1 {
-    font-size: 56px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 64px;
     font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 24px;
+    line-height: 1.05;
+    margin-bottom: 28px;
     letter-spacing: -2px;
 }
 
@@ -373,7 +389,11 @@ a {
     align-items: center;
 }
 
-.catalog-title-area h2 { font-size: 32px; font-weight: 800; }
+.catalog-title-area h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+}
 
 .filter-controls { display: flex; align-items: center; gap: 16px; }
 
@@ -515,7 +535,12 @@ a {
     margin-bottom: 40px;
 }
 
-.header-text h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.header-text h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
 .header-text p { color: var(--text-muted); }
 
 .btn-outline {
@@ -680,7 +705,13 @@ a {
     margin-bottom: 8px;
 }
 
-.info-head h2 { font-size: 32px; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+.info-head h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
 
 .tab-system { margin-bottom: 40px; }
 .tabs {

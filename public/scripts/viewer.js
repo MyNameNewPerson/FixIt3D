@@ -116,7 +116,7 @@ function renderAffiliateLinks(name) {
     container.innerHTML = platforms.map(p => `
         <a href="${p.url}" target="_blank" class="market-btn ${isLikelyHardware ? 'highlight-buy' : ''}">
             <span>${p.name}</span>
-            <span class="price-hint">${isLikelyHardware ? 'Buy Original' : 'Check Price'} ↗</span>
+            <span class="price-hint">${isLikelyHardware ? getTranslation('buy-original') : getTranslation('check-price')} ↗</span>
         </a>
     `).join('');
 }
@@ -138,8 +138,9 @@ function initCalculator() {
 
         const weight = volume * density * (infill/100 + 0.15);
         const price = Math.max(350, Math.round(weight * 25)); // adjusted price
+        const currency = getTranslation('calc-currency');
 
-        if (resultDiv) resultDiv.textContent = `${price} ₽`;
+        if (resultDiv) resultDiv.textContent = `${price} ${currency}`;
     };
 
     matSelect.onchange = update;
