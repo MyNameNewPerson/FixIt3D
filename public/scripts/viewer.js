@@ -26,15 +26,17 @@ window.openModelModal = function(model) {
     const viewer = document.getElementById('modal-viewer');
     const fallback = document.getElementById('modal-image-fallback');
     
+    const fallbackUrl = 'https://via.placeholder.com/800x600?text=Preview+Unavailable';
     if (model.stl_url) {
         viewer.style.display = 'block';
         fallback.style.display = 'none';
         viewer.src = model.stl_url;
-        viewer.poster = model.image || '';
+        viewer.poster = model.image || fallbackUrl;
     } else {
         viewer.style.display = 'none';
         fallback.style.display = 'block';
-        fallback.src = model.image || 'https://via.placeholder.com/800x600?text=No+Preview';
+        fallback.src = model.image || fallbackUrl;
+        fallback.onerror = function() { this.src = fallbackUrl; this.onerror = null; };
     }
 
     // Reset Master Status

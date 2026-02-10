@@ -146,20 +146,46 @@ def fetch_results(queries, mode, headers):
 
 def parse_thingiverse():
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
+    output_path = 'data/models-index.json'
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    # Load existing models to avoid duplicates and implement incremental updates
+    existing_models = {}
+    if os.path.exists(output_path):
+        try:
+            with open(output_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                for m in data:
+                    existing_models[m['objectID']] = m
+            print(f"Loaded {len(existing_models)} existing models.")
+        except Exception as e:
+            print(f"Error loading existing models: {e}")
+
+    # Fetch results
     spare_parts = fetch_results(SPARE_PARTS_QUERIES, 'spare-parts', headers)
     hobby_parts = fetch_results(HOBBY_QUERIES, 'hobby', headers)
 
-    all_models = {**spare_parts, **hobby_parts}
-    models_list = list(all_models.values())
-    
-    output_path = 'data/models-index.json'
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    # Update existing models with new ones
+    new_count = 0
+    for model_id, model_data in spare_parts.items():
+        if model_id not in existing_models:
+            existing_models[model_id] = model_data
+            new_count += 1
+
+    for model_id, model_data in hobby_parts.items():
+        if model_id not in existing_models:
+            existing_models[model_id] = model_data
+            new_count += 1
+
+    models_list = list(existing_models.values())
+
+    # Sort by popularity or date if needed
+    models_list.sort(key=lambda x: x.get('popularity', 0), reverse=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(models_list, f, ensure_ascii=False, indent=2)
 
-    print(f"Saved {len(models_list)} total models to {output_path}")
+    print(f"Update complete. Added {new_count} new models. Total: {len(models_list)}")
 
 if __name__ == '__main__':
     parse_thingiverse()

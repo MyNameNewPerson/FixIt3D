@@ -17,14 +17,25 @@ const FUNCTIONAL_KEYWORDS = [
 export default async function handler(req, res) {
   const { q = '', brand = '', mode = 'spare-parts', page = 1, per_page = 20 } = req.query;
 
+  console.log(`[search] Request: mode=${mode}, q=${q}, brand=${brand}, page=${page}`);
+
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'models-index.json');
+    const dataPath = path.resolve(process.cwd(), 'data', 'models-index.json');
+    console.log(`[search] Reading data from: ${dataPath}`);
+
     if (!fs.existsSync(dataPath)) {
+      console.warn(`[search] Index file NOT FOUND at ${dataPath}. Returning empty results.`);
       return res.status(200).json({ hits: [], totalPages: 0, currentPage: 1, totalResults: 0 });
     }
 
     const fileData = fs.readFileSync(dataPath, 'utf8');
-    let allHits = JSON.parse(fileData);
+    let allHits = [];
+    try {
+        allHits = JSON.parse(fileData);
+    } catch (parseErr) {
+        console.error(`[search] Failed to parse JSON: ${parseErr.message}`);
+        return res.status(500).json({ error: 'Data index is corrupted' });
+    }
 
     // Filter by mode
     let filteredHits = allHits.filter(h => h.mode === mode);

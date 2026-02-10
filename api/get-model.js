@@ -7,9 +7,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'URL parameter is required' });
   }
 
-  // Handle relative URLs for local development
+  // Handle relative URLs
   if (url.startsWith('/')) {
-    url = `http://localhost:3000${url}`;
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const host = req.headers['host'];
+    url = `${protocol}://${host}${url}`;
   }
 
   console.log(`[get-model] Proxying request for: ${url}`);
@@ -23,9 +25,11 @@ export default async function handler(req, res) {
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     res.setHeader('Content-Type', contentType);
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
 
     // node-fetch v2/v3 body is a Node.js Readable stream
-    response.body.pipe(res);
+    const buffer = await response.arrayBuffer();
+    res.send(Buffer.from(buffer));
 
   } catch (error) {
     console.error('Proxy fetch error:', error);

@@ -57,9 +57,15 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
     hits.forEach(model => {
         const card = document.createElement('div');
         card.className = 'model-card';
+        const fallbackImg = 'https://via.placeholder.com/400x300?text=Preview+Unavailable';
+
         card.innerHTML = `
             <div class="card-image">
-                <img src="${model.image || 'https://via.placeholder.com/400x300?text=FixIt3D'}" alt="${model.name}" loading="lazy" referrerpolicy="no-referrer">
+                <img src="${model.image || fallbackImg}"
+                     alt="${model.name}"
+                     loading="lazy"
+                     referrerpolicy="no-referrer"
+                     onerror="this.src='${fallbackImg}'; this.onerror=null;">
                 ${model.brand ? `<span class="card-badge">${model.brand}</span>` : ''}
             </div>
             <div class="card-body">

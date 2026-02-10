@@ -58,7 +58,8 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/octet-stream');
 
     // 5. Стримим файл пользователю
-    downloadResponse.body.pipe(res);
+    const buffer = await downloadResponse.arrayBuffer();
+    res.send(Buffer.from(buffer));
 
   } catch (error) {
     console.error('Download error:', error);
