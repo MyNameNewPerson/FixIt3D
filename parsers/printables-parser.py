@@ -6,9 +6,9 @@ import random
 
 PRINTABLES_API = 'https://api.printables.com/graphql/'
 
-JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part"]
+JOKE_KEYWORDS = ["joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part", "decoration", "figurine", "toy"]
 BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'Indesit', 'Kenwood', 'Moulinex', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko']
-SPARE_KEYWORDS = ['repair', 'replacement', 'spare part', 'fix', 'gear', 'knob', 'mount', 'bracket', 'handle', 'button', 'clip', 'adapter']
+SPARE_KEYWORDS = ['repair', 'replacement', 'spare part', 'fix', 'gear', 'knob', 'mount', 'bracket', 'handle', 'button', 'clip', 'adapter', 'impeller', 'pulley', 'bushing', 'nozzle']
 HOBBY_KEYWORDS = ['dnd', 'warhammer', 'miniature', 'terrain', 'minecraft', 'pokemon', 'zelda', 'star wars', 'cosplay', 'toy', 'puzzle', 'action figure', 'decoration', 'vase', 'art', 'jewelry']
 
 QUERY = '''

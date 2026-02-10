@@ -104,20 +104,23 @@ function renderAffiliateLinks(name) {
     if (!container) return;
     
     // Check if part is printable or likely needs buying
-    const nonPrintableKeywords = ['spring', 'motor', 'engine', 'logic board', 'display', 'glass', 'пружина', 'мотор', 'плата', 'стекло', 'металл', 'metal'];
+    const nonPrintableKeywords = ['spring', 'motor', 'engine', 'logic board', 'display', 'glass', 'пружина', 'мотор', 'плата', 'стекло', 'металл', 'metal', 'screw', 'bolt'];
     const isLikelyHardware = nonPrintableKeywords.some(k => name.toLowerCase().includes(k));
 
     const q = encodeURIComponent(name);
     const platforms = [
-        { name: 'Amazon', url: `https://www.amazon.com/s?k=${q}&tag=fixit3d-20`, cls: '' },
-        { name: 'AliExpress', url: `https://www.aliexpress.com/wholesale?SearchText=${q}`, cls: '' },
-        { name: 'Yandex Market', url: `https://yandex.ru/products/search?text=${q}`, cls: '' },
-        { name: 'Ozon', url: `https://www.ozon.ru/search/?text=${q}`, cls: '' }
+        { name: 'Amazon', url: `https://www.amazon.com/s?k=${q}&tag=fixit3d-21`, icon: '🛒' },
+        { name: 'AliExpress', url: `https://www.aliexpress.com/wholesale?SearchText=${q}`, icon: '📦' },
+        { name: 'Yandex Market', url: `https://yandex.ru/products/search?text=${q}`, icon: '🇷🇺' },
+        { name: 'Ozon', url: `https://www.ozon.ru/search/?text=${q}`, icon: '🔵' }
     ];
 
     container.innerHTML = platforms.map(p => `
         <a href="${p.url}" target="_blank" class="market-btn ${isLikelyHardware ? 'highlight-buy' : ''}">
-            <span>${p.name}</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:20px;">${p.icon}</span>
+                <span>${p.name}</span>
+            </div>
             <span class="price-hint">${isLikelyHardware ? getTranslation('buy-original') : getTranslation('check-price')} ↗</span>
         </a>
     `).join('');
@@ -131,6 +134,7 @@ function initCalculator() {
     
     if (!matSelect || !infInput) return;
 
+    // Density values: PLA ~1.24, PETG ~1.27, ABS ~1.04
     const volume = currentModel.volume_cm3 || 35;
 
     const update = () => {
@@ -138,11 +142,13 @@ function initCalculator() {
         const infill = parseInt(infInput.value);
         if (infVal) infVal.textContent = `${infill}%`;
 
+        // Estimation: (Volume * Density) * (Infill % + shell overhead)
         const weight = volume * density * (infill/100 + 0.15);
-        const price = Math.max(350, Math.round(weight * 25)); // adjusted price
+        // Cost: ~25 RUB per gram (includes work/energy/amortization)
+        const basePrice = Math.max(350, Math.round(weight * 25));
         const currency = getTranslation('calc-currency');
 
-        if (resultDiv) resultDiv.textContent = `${price} ${currency}`;
+        if (resultDiv) resultDiv.textContent = `${basePrice} ${currency}`;
     };
 
     matSelect.onchange = update;

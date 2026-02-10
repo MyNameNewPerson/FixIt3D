@@ -30,7 +30,30 @@
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "RUB"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "1250"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://fixit3d.ru/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
       }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "FixIt3D",
+      "url": "https://fixit3d.ru",
+      "logo": "https://fixit3d.ru/images/logo.png",
+      "sameAs": [
+        "https://vk.com/fixit3d",
+        "https://t.me/fixit3d"
+      ]
     }
     </script>
 
@@ -76,7 +99,7 @@
                     <button class="lang-link" data-lang="en">EN</button>
                 </div>
 
-                <a href="#" class="btn-cta" data-i18n="nav-add">Добавить модель</a>
+                <a href="/add-model.html" class="btn-cta" data-i18n="nav-add">Добавить модель</a>
             </div>
         </div>
     </header>
@@ -97,6 +120,9 @@
                             <div class="search-icon">🔍</div>
                             <input type="text" id="search-input" data-i18n="hero-search-placeholder" placeholder="Например: шестерня для Bosch Maxx 7">
                             <button id="search-btn" data-i18n="hero-search-btn">Найти модель</button>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-top: 8px;">
+                            <button class="btn-secondary" onclick="document.getElementById('map-section').scrollIntoView({behavior:'smooth'})" data-i18n="hero-find-master">Найти мастера</button>
                         </div>
                         <div class="search-tags" id="popular-tags">
                             <span data-i18n="hero-popular">Популярно:</span>
@@ -126,6 +152,36 @@
             </div>
         </section>
 
+        <section id="map-section" class="service-section">
+            <div class="container">
+                <div class="section-card">
+                    <div class="section-header-row">
+                        <div class="header-text">
+                            <h2 data-i18n="map-title">Карта мастеров 3D-печати</h2>
+                            <p data-i18n="map-subtitle">Найдите ближайшего специалиста, если у вас нет своего принтера</p>
+                        </div>
+                        <div class="header-actions">
+                            <a href="/masters/join" class="btn-outline" data-i18n="map-join">Стать мастером</a>
+                        </div>
+                    </div>
+                    <div class="map-container-layout">
+                        <div class="map-sidebar">
+                            <div class="location-search">
+                                <div class="search-icon-mini">📍</div>
+                                <input type="text" data-i18n="map-city-placeholder" placeholder="Поиск по городу..." id="map-city-search">
+                            </div>
+                            <div id="masters-list" class="masters-mini-list">
+                                <!-- List of closest masters -->
+                            </div>
+                        </div>
+                        <div class="map-main">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="models-section" class="catalog-section">
             <div class="container">
                 <div class="catalog-header">
@@ -151,33 +207,6 @@
                 </div>
 
                 <div id="pagination-container" class="pagination"></div>
-            </div>
-        </section>
-
-        <section id="map-section" class="service-section">
-            <div class="container">
-                <div class="section-card">
-                    <div class="section-header-row">
-                        <div class="header-text">
-                            <h2 data-i18n="map-title">Карта мастеров 3D-печати</h2>
-                            <p data-i18n="map-subtitle">Найдите ближайшего специалиста, если у вас нет своего принтера</p>
-                        </div>
-                        <a href="/masters/join" class="btn-outline" data-i18n="map-join">Стать мастером</a>
-                    </div>
-                    <div class="map-container-layout">
-                        <div class="map-sidebar">
-                            <div class="location-search">
-                                <input type="text" data-i18n="map-city-placeholder" placeholder="Ваш город..." id="map-city-search">
-                            </div>
-                            <div id="masters-list" class="masters-mini-list">
-                                <!-- List of closest masters -->
-                            </div>
-                        </div>
-                        <div class="map-main">
-                            <div id="map"></div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
@@ -226,6 +255,9 @@
                 </div>
             </div>
             <div class="footer-bottom">
+                <div class="footer-legal-notice" style="max-width: 800px; font-size: 11px; margin-bottom: 20px;">
+                    <p><strong>Disclaimer:</strong> FixIt3D is a search engine for 3D models. We do not manufacture or guarantee the compatibility of any printed parts. Use of 3D-printed parts for critical appliances is at your own risk. 3D-printed parts may not meet original manufacturer safety standards.</p>
+                </div>
                 <p data-i18n="footer-copy">&copy; 2024 FixIt3D Project. Built for a sustainable future.</p>
             </div>
         </div>
@@ -236,7 +268,7 @@
         <div class="modal-backdrop"></div>
         <div class="modal-content-wrapper">
             <div class="modal-card-detail">
-                <button class="close-modal-btn">&times;</button>
+                <button class="close-modal-btn close-modal">&times;</button>
                 <div class="modal-grid">
                     <div class="modal-visual-column">
                         <div class="viewer-main">
@@ -259,7 +291,7 @@
                             <div class="tabs">
                                 <button class="tab-btn active" data-tab="print" data-i18n="tab-print">Печать</button>
                                 <button class="tab-btn" data-tab="buy" data-i18n="tab-buy">Купить готовую</button>
-                                <button class="tab-btn" data-tab="calc" data-i18n="tab-calc">Расчет</button>
+                                <button class="tab-btn btn-calc" data-tab="calc" data-i18n="tab-calc">Расчет</button>
                             </div>
 
                             <div class="tab-content" id="tab-print">

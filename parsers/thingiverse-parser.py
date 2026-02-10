@@ -15,13 +15,14 @@ THINGIVERSE_API = 'https://api.thingiverse.com'
 JOKE_KEYWORDS = [
     "joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part",
     "keychain", "logo", "decoration", "figurine", "statue", "ornament", "fan art", "toy", "miniature", "sign",
-    "display", "stand", "desktop", "accessory", "charm", "pendant", "wall art", "poster", "non-functional"
+    "display", "stand", "desktop", "accessory", "charm", "pendant", "wall art", "poster", "non-functional",
+    "figurine", "statue", "toy", "action figure", "decoration"
 ]
 
 FUNCTIONAL_KEYWORDS = [
     "gear", "knob", "handle", "bracket", "clip", "button", "lever", "mount", "adapter", "joint", "wheel",
     "shaft", "seal", "gasket", "spring", "latch", "hinge", "cap", "plug", "cover", "base", "housing", "shell",
-    "replacement", "repair", "fix", "part"
+    "replacement", "repair", "fix", "part", "impeller", "pulley", "bushing", "nozzle"
 ]
 
 SPARE_PARTS_QUERIES = {

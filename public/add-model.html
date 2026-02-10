@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить модель | FixIt3D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Outfit:wght@600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        .form-container { max-width: 600px; margin: 60px auto; background: white; padding: 40px; border-radius: 24px; box-shadow: var(--shadow-lg); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-main); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; }
+        .submit-btn { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: var(--primary-dark); }
+        .back-nav { margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="back-nav">
+                <a href="/" style="color: var(--primary); font-weight: 700;">← На главную</a>
+            </div>
+            <h1 style="font-family: 'Outfit', sans-serif; margin-bottom: 24px;">Предложить 3D-модель</h1>
+            <p style="color: var(--text-muted); margin-bottom: 30px;">Помогите сообществу — добавьте ссылку на полезную запчасть или проект для хобби.</p>
+
+            <form id="add-model-form">
+                <div class="form-group">
+                    <label>Название модели</label>
+                    <input type="text" placeholder="Например: Шестерня мясорубки Bosch" required>
+                </div>
+                <div class="form-group">
+                    <label>Бренд (если применимо)</label>
+                    <input type="text" placeholder="Bosch, Dyson, и т.д.">
+                </div>
+                <div class="form-group">
+                    <label>Категория</label>
+                    <select>
+                        <option value="spare-parts">Запчасти для техники</option>
+                        <option value="hobby">Хобби и Игры</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ссылка на файл (STL / Thingiverse / Printables)</label>
+                    <input type="url" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Описание</label>
+                    <textarea rows="4" placeholder="Краткое описание детали и процесса печати..."></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Отправить на модерацию</button>
+            </form>
+            <div id="success-msg" style="display:none; text-align:center; margin-top:20px; color: var(--success); font-weight: 700;">
+                Спасибо! Модель отправлена на проверку.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('add-model-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            e.target.style.display = 'none';
+            document.getElementById('success-msg').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

@@ -6,7 +6,7 @@ let currentBrand = '';
 let currentMode = 'spare-parts'; // 'spare-parts' or 'hobby'
 let currentPage = 1;
 
-const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko'];
+const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'Indesit', 'Kenwood', 'Moulinex', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko'];
 const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home', 'Decor', 'Cosplay', 'Art'];
 
 async function searchModels(query = '', brand = '', page = 1) {
