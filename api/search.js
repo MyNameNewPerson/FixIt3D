@@ -40,21 +40,23 @@ export default async function handler(req, res) {
     // Filter by mode
     let filteredHits = allHits.filter(h => h.mode === mode);
 
-    // Apply Blacklist for SPARE PARTS specifically
-    if (mode === 'spare-parts') {
+    // Apply Blacklist for technical modes
+    if (['spare-parts', 'auto', 'home'].includes(mode)) {
       filteredHits = filteredHits.filter(h => {
         const text = (h.name + ' ' + (h.description || '')).toLowerCase();
 
         // 1. Check blacklist
         if (BLACKLIST_WORDS.some(word => text.includes(word))) return false;
 
-        // 2. Strict functional check for branded items
-        const brands = ['bosch', 'dyson', 'samsung', 'lg', 'whirlpool', 'miele', 'ikea', 'kitchenaid'];
-        const containsBrand = brands.some(b => text.includes(b));
+        // 2. Strict functional check for branded items in spare-parts
+        if (mode === 'spare-parts') {
+            const brands = ['bosch', 'dyson', 'samsung', 'lg', 'whirlpool', 'miele', 'ikea', 'kitchenaid'];
+            const containsBrand = brands.some(b => text.includes(b));
 
-        if (containsBrand) {
-            const hasFunctional = FUNCTIONAL_KEYWORDS.some(fk => text.includes(fk));
-            if (!hasFunctional) return false;
+            if (containsBrand) {
+                const hasFunctional = FUNCTIONAL_KEYWORDS.some(fk => text.includes(fk));
+                if (!hasFunctional) return false;
+            }
         }
 
         return true;
@@ -65,7 +67,7 @@ export default async function handler(req, res) {
         const brandL = brand.toLowerCase();
         filteredHits = filteredHits.filter(h => {
            const name = h.name.toLowerCase();
-           return h.brand === brand || name.includes(brandL);
+           return (h.brand && h.brand.toLowerCase() === brandL) || name.includes(brandL);
         });
       }
     } else {
@@ -75,6 +77,10 @@ export default async function handler(req, res) {
         const text = h.name.toLowerCase();
         return !toxicWords.some(word => text.includes(word));
       });
+
+      if (brand) {
+        filteredHits = filteredHits.filter(h => h.brand === brand || h.category === brand);
+      }
     }
 
     // Filter by search query

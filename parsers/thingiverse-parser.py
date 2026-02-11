@@ -53,7 +53,25 @@ HOBBY_QUERIES = {
     'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain', 'pathfinder'],
     'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars', 'cosplay', 'mario'],
     'Toys': ['toy', 'puzzle', 'action+figure', 'lego'],
-    'Home': ['decoration', 'vase', 'art', 'jewelry', 'sculpture']
+    'Decor': ['decoration', 'vase', 'art', 'jewelry', 'sculpture']
+}
+
+AUTO_QUERIES = {
+    'Toyota': ['Toyota+part', 'Toyota+accessory', 'Toyota+repair'],
+    'BMW': ['BMW+part', 'BMW+accessory', 'BMW+repair'],
+    'Mercedes': ['Mercedes+part', 'Mercedes+repair'],
+    'Audi': ['Audi+part', 'Audi+repair'],
+    'Volkswagen': ['VW+part', 'VW+repair'],
+    'Tesla': ['Tesla+part', 'Tesla+accessory'],
+    'Accessories': ['car+holder', 'cupholder', 'key+fob', 'clip', 'car+interior']
+}
+
+HOME_QUERIES = {
+    'Makita': ['Makita+spare+part', 'Makita+repair', 'Makita+adapter'],
+    'Karcher': ['Karcher+spare+part', 'Karcher+repair', 'Karcher+nozzle'],
+    'DeWalt': ['DeWalt+part', 'DeWalt+adapter'],
+    'Garden': ['garden+tool', 'hose+connector', 'irrigation'],
+    'Kitchen': ['organizer', 'hook', 'shelf', 'drainer']
 }
 
 def is_joke(name, description, mode):
@@ -165,18 +183,16 @@ def parse_thingiverse():
     # Fetch results
     spare_parts = fetch_results(SPARE_PARTS_QUERIES, 'spare-parts', headers)
     hobby_parts = fetch_results(HOBBY_QUERIES, 'hobby', headers)
+    auto_parts = fetch_results(AUTO_QUERIES, 'auto', headers)
+    home_parts = fetch_results(HOME_QUERIES, 'home', headers)
 
     # Update existing models with new ones
     new_count = 0
-    for model_id, model_data in spare_parts.items():
-        if model_id not in existing_models:
-            existing_models[model_id] = model_data
-            new_count += 1
-
-    for model_id, model_data in hobby_parts.items():
-        if model_id not in existing_models:
-            existing_models[model_id] = model_data
-            new_count += 1
+    for category_data in [spare_parts, hobby_parts, auto_parts, home_parts]:
+        for model_id, model_data in category_data.items():
+            if model_id not in existing_models:
+                existing_models[model_id] = model_data
+                new_count += 1
 
     models_list = list(existing_models.values())
 

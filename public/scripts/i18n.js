@@ -60,13 +60,25 @@ const translations = {
 
         // Modes
         "mode-spare": "Запчасти",
+        "mode-auto": "Авто",
+        "mode-home": "Дом",
         "mode-hobby": "Хобби",
 
-        // Hobby Mode Hero
+        // Hero Titles
         "hobby-hero-title": "Создавайте <span class=\"text-gradient\">шедевры</span> сами",
         "hobby-hero-subtitle": "Тысячи моделей для хобби, игр и декора. От настольных миниатюр до интерьерных решений.",
+        "auto-hero-title": "Прокачайте свой <span class=\"text-gradient\">автомобиль</span>",
+        "auto-hero-subtitle": "Аксессуары и запчасти для Toyota, BMW, Tesla и других марок. Печатайте то, что сложно найти в продаже.",
+        "home-hero-title": "Умные решения для <span class=\"text-gradient\">вашего дома</span>",
+        "home-hero-subtitle": "От органайзеров до запчастей для Makita и Karcher. Сделайте свой быт удобнее и экологичнее.",
+
+        // Catalog Titles
+        "catalog-title-hobby": "Каталог хобби-моделей",
+        "catalog-title-auto": "Каталог авто-товаров",
+        "catalog-title-home": "Каталог товаров для дома",
 
         // Map
+        "tab-map": "Мастера",
         "map-title": "Карта мастеров 3D-печати",
         "map-subtitle": "Найдите ближайшего специалиста, если у вас нет своего принтера",
         "map-join": "Стать мастером",
@@ -144,13 +156,25 @@ const translations = {
 
         // Modes
         "mode-spare": "Parts",
+        "mode-auto": "Auto",
+        "mode-home": "Home",
         "mode-hobby": "Hobby",
 
-        // Hobby Mode Hero
+        // Hero Titles
         "hobby-hero-title": "Create <span class=\"text-gradient\">masterpieces</span> yourself",
         "hobby-hero-subtitle": "Thousands of models for hobbies, games, and decor. From tabletop miniatures to interior solutions.",
+        "auto-hero-title": "Upgrade your <span class=\"text-gradient\">vehicle</span>",
+        "auto-hero-subtitle": "Accessories and parts for Toyota, BMW, Tesla and more. Print what's hard to find in stores.",
+        "home-hero-title": "Smart solutions for <span class=\"text-gradient\">your home</span>",
+        "home-hero-subtitle": "From organizers to spare parts for Makita and Karcher. Make your life easier and more sustainable.",
+
+        // Catalog Titles
+        "catalog-title-hobby": "Hobby Catalog",
+        "catalog-title-auto": "Auto Parts Catalog",
+        "catalog-title-home": "Home & Garden Catalog",
 
         // Map
+        "tab-map": "Masters",
         "map-title": "3D Printing Masters Map",
         "map-subtitle": "Find a local specialist if you don't have your own printer",
         "map-join": "Join as Master",

@@ -1,6 +1,7 @@
 // public/scripts/viewer.js
 
 import { getTranslation } from './i18n.js';
+import { initMap } from './maps.js';
 
 const modal = document.getElementById('model-modal');
 const closeBtn = document.querySelector('.close-modal-btn');
@@ -79,9 +80,7 @@ if (downloadBtn) {
 
 if (findMasterBtn) {
     findMasterBtn.addEventListener('click', () => {
-        closeModal();
-        document.getElementById('map-section').scrollIntoView({ behavior: 'smooth' });
-        // Optionally trigger geolocation or filter map here
+        switchTab('map');
     });
 }
 
@@ -93,6 +92,10 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(content => {
         content.style.display = content.id === `tab-${tabId}` ? 'block' : 'none';
     });
+
+    if (tabId === 'map') {
+        initMap();
+    }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {

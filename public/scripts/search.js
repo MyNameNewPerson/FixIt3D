@@ -3,11 +3,13 @@ import { getTranslation, getCurrentLanguage, setLanguage } from './i18n.js';
 
 let currentQuery = '';
 let currentBrand = '';
-let currentMode = 'spare-parts'; // 'spare-parts' or 'hobby'
+let currentMode = 'spare-parts'; // 'spare-parts', 'hobby', 'auto', 'home'
 let currentPage = 1;
 
 const SPARE_PARTS_BRANDS = ['Bosch', 'Dyson', 'Ikea', 'Samsung', 'LG', 'Whirlpool', 'Philips', 'Braun', 'Miele', 'Xiaomi', 'Electrolux', 'Indesit', 'Kenwood', 'Moulinex', 'KitchenAid', 'Bork', 'DeLonghi', 'Tefal', 'Rowenta', 'Beko'];
-const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Home', 'Decor', 'Cosplay', 'Art'];
+const HOBBY_BRANDS = ['Tabletop', 'Games', 'Toys', 'Decor', 'Cosplay', 'Art'];
+const AUTO_BRANDS = ['Toyota', 'BMW', 'Mercedes', 'Audi', 'Volkswagen', 'Tesla', 'Accessories'];
+const HOME_BRANDS = ['Makita', 'Karcher', 'DeWalt', 'Garden', 'Kitchen'];
 
 async function searchModels(query = '', brand = '', page = 1) {
     const grid = document.getElementById('models-grid');
@@ -135,7 +137,11 @@ function updateBrandFilters() {
     if (!container) return;
     container.innerHTML = `<button class="filter-chip active" data-brand="">${getTranslation('all-brands')}</button>`;
     
-    const brands = currentMode === 'spare-parts' ? SPARE_PARTS_BRANDS : HOBBY_BRANDS;
+    let brands = [];
+    if (currentMode === 'spare-parts') brands = SPARE_PARTS_BRANDS;
+    else if (currentMode === 'hobby') brands = HOBBY_BRANDS;
+    else if (currentMode === 'auto') brands = AUTO_BRANDS;
+    else if (currentMode === 'home') brands = HOME_BRANDS;
 
     brands.forEach(brand => {
         const btn = document.createElement('button');
@@ -169,9 +175,11 @@ function updatePopularTags() {
     container.innerHTML = '';
     container.appendChild(label);
 
-    const tags = currentMode === 'spare-parts'
-        ? ['Bosch', 'Dyson', getTranslation('tag-gear'), 'Samsung']
-        : ['D&D', 'Warhammer', 'Marvel', 'Pokemon'];
+    let tags = [];
+    if (currentMode === 'spare-parts') tags = ['Bosch', 'Dyson', getTranslation('tag-gear'), 'Samsung'];
+    else if (currentMode === 'hobby') tags = ['D&D', 'Warhammer', 'Marvel', 'Pokemon'];
+    else if (currentMode === 'auto') tags = ['Toyota', 'BMW', 'Tesla', 'Cupholder'];
+    else if (currentMode === 'home') tags = ['Makita', 'Karcher', 'Hook', 'Organizer'];
 
     tags.forEach(t => {
         const a = document.createElement('a');
@@ -208,6 +216,14 @@ function switchMode(mode) {
         if (mainTitle) mainTitle.innerHTML = getTranslation('hobby-hero-title');
         if (mainSubtitle) mainSubtitle.textContent = getTranslation('hobby-hero-subtitle');
         if (catalogTitle) catalogTitle.textContent = getTranslation('catalog-title-hobby');
+    } else if (mode === 'auto') {
+        if (mainTitle) mainTitle.innerHTML = getTranslation('auto-hero-title');
+        if (mainSubtitle) mainSubtitle.textContent = getTranslation('auto-hero-subtitle');
+        if (catalogTitle) catalogTitle.textContent = getTranslation('catalog-title-auto');
+    } else if (mode === 'home') {
+        if (mainTitle) mainTitle.innerHTML = getTranslation('home-hero-title');
+        if (mainSubtitle) mainSubtitle.textContent = getTranslation('home-hero-subtitle');
+        if (catalogTitle) catalogTitle.textContent = getTranslation('catalog-title-home');
     } else {
         if (mainTitle) mainTitle.innerHTML = getTranslation('hero-title');
         if (mainSubtitle) mainSubtitle.textContent = getTranslation('hero-subtitle');
