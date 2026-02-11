@@ -1,30 +1,39 @@
 // public/scripts/maps.js
 
-async function initMap() {
+let mapInstance = null;
+let mastersData = null;
+
+export async function initMap() {
     const mapContainer = document.getElementById('map');
-    if (!mapContainer) return;
+    if (!mapContainer || mapInstance) {
+        if (mapInstance) mapInstance.invalidateSize();
+        return;
+    }
 
     try {
-        console.log('Fetching masters data...');
-        const response = await fetch('/data/masters.json');
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!mastersData) {
+            console.log('Fetching masters data...');
+            const response = await fetch('/data/masters.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            mastersData = data.masters;
+            console.log('Masters data loaded:', mastersData);
         }
-        const data = await response.json();
-        console.log('Masters data loaded:', data);
 
         if (typeof L === 'undefined') {
             throw new Error('Leaflet is not loaded. Check internet connection or script tags.');
         }
 
         // Initial view: Russia
-        const map = L.map('map', {
+        mapInstance = L.map('map', {
             scrollWheelZoom: false
         }).setView([55.75, 37.61], 4);
 
         L.tileLayer('https://{s}.tile.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '©OpenStreetMap, ©CartoDB'
-        }).addTo(map);
+        }).addTo(mapInstance);
 
         const markers = [];
         const mastersList = document.getElementById('masters-list');
@@ -42,12 +51,16 @@ async function initMap() {
                 const item = document.createElement('div');
                 item.className = 'master-item-mini';
                 item.innerHTML = `
-                    <h4>${master.name}</h4>
-                    <p>${master.city}</p>
-                    <p style="font-size:11px; margin-top:4px;">${master.equipment}</p>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h4>${master.name}</h4>
+                            <p>${master.city}</p>
+                        </div>
+                        <button class="btn-action-main" style="padding:4px 8px; font-size:10px;">Выбрать</button>
+                    </div>
                 `;
                 item.onclick = () => {
-                    map.setView([master.lat, master.lng], 14);
+                    mapInstance.setView([master.lat, master.lng], 14);
                     const m = markers.find(m => m.masterId === master.id);
                     if (m) m.marker.openPopup();
                 };
@@ -55,19 +68,16 @@ async function initMap() {
             });
         }
 
-        data.masters.forEach(master => {
+        mastersData.forEach(master => {
             if (master.lat && master.lng) {
-                const marker = L.marker([master.lat, master.lng]).addTo(map);
+                const marker = L.marker([master.lat, master.lng]).addTo(mapInstance);
                 marker.bindPopup(`
-                    <div class="map-popup" style="padding:10px; min-width:200px;">
-                        <strong style="font-size:16px;">${master.name}</strong><br>
-                        <span style="color:var(--text-muted)">${master.city}</span><br>
-                        <p style="font-size:12px; margin: 8px 0;">${master.equipment}</p>
-                        <div style="margin-top: 12px; display:flex; gap:8px;">
+                    <div class="map-popup" style="padding:5px; min-width:150px;">
+                        <strong style="font-size:14px;">${master.name}</strong><br>
+                        <span style="color:var(--text-muted); font-size:12px;">${master.city}</span><br>
+                        <div style="margin-top: 8px; display:flex; gap:4px;">
                             <a href="https://wa.me/${master.whatsapp.replace(/\D/g, '')}" target="_blank"
-                               style="background:#25D366; color:white; padding:8px 12px; border-radius:6px; font-weight:700; font-size:12px; flex:1; text-align:center;">WhatsApp</a>
-                            <a href="tel:${master.phone}"
-                               style="background:var(--primary); color:white; padding:8px 12px; border-radius:6px; font-weight:700; font-size:12px; flex:1; text-align:center;">Позвонить</a>
+                               style="background:#25D366; color:white; padding:4px 8px; border-radius:4px; font-weight:700; font-size:10px; flex:1; text-align:center;">WhatsApp</a>
                         </div>
                     </div>
                 `);
@@ -75,39 +85,29 @@ async function initMap() {
             }
         });
 
-        renderMastersList(data.masters);
-
-        // Map Search
-        const searchInput = document.getElementById('map-city-search');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const query = e.target.value.toLowerCase();
-                const filtered = data.masters.filter(m =>
-                    m.city.toLowerCase().includes(query) ||
-                    m.name.toLowerCase().includes(query)
-                );
-                renderMastersList(filtered);
-            });
-        }
+        renderMastersList(mastersData);
 
         // Geolocation
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(position => {
                 const userCoords = [position.coords.latitude, position.coords.longitude];
-                map.setView(userCoords, 11);
+                mapInstance.setView(userCoords, 11);
                 L.circle(userCoords, {
                     color: 'var(--primary)',
                     fillColor: 'var(--primary)',
                     fillOpacity: 0.2,
                     radius: 2000
-                }).addTo(map).bindPopup('Ваше местоположение');
+                }).addTo(mapInstance).bindPopup('Ваше местоположение');
             }, (err) => {
                 console.warn('Geolocation failed:', err.message);
             });
         }
 
         // Handle window resize
-        window.addEventListener('resize', () => map.invalidateSize());
+        window.addEventListener('resize', () => mapInstance.invalidateSize());
+
+        // Initial invalidate
+        setTimeout(() => mapInstance.invalidateSize(), 100);
 
     } catch (error) {
         console.error('Map error:', error);
@@ -121,4 +121,3 @@ async function initMap() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', initMap);

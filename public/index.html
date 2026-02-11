@@ -84,11 +84,12 @@
             <div class="header-center">
                 <div class="mode-switch" id="mode-switch-ui">
                     <button class="mode-btn active" data-mode="spare-parts" data-i18n="mode-spare">Запчасти</button>
+                    <button class="mode-btn" data-mode="auto" data-i18n="mode-auto">Авто</button>
+                    <button class="mode-btn" data-mode="home" data-i18n="mode-home">Дом</button>
                     <button class="mode-btn" data-mode="hobby" data-i18n="mode-hobby">Хобби</button>
                 </div>
                 <nav class="main-nav">
                     <a href="#models-section" data-i18n="nav-catalog">Каталог</a>
-                    <a href="#map-section" data-i18n="nav-map">Карта мастеров</a>
                 </nav>
             </div>
 
@@ -121,9 +122,6 @@
                             <input type="text" id="search-input" data-i18n="hero-search-placeholder" placeholder="Например: шестерня для Bosch Maxx 7">
                             <button id="search-btn" data-i18n="hero-search-btn">Найти модель</button>
                         </div>
-                        <div style="display: flex; gap: 12px; margin-top: 8px;">
-                            <button class="btn-secondary" onclick="document.getElementById('map-section').scrollIntoView({behavior:'smooth'})" data-i18n="hero-find-master">Найти мастера</button>
-                        </div>
                         <div class="search-tags" id="popular-tags">
                             <span data-i18n="hero-popular">Популярно:</span>
                             <!-- Tags injected by search.js -->
@@ -152,35 +150,6 @@
             </div>
         </section>
 
-        <section id="map-section" class="service-section">
-            <div class="container">
-                <div class="section-card">
-                    <div class="section-header-row">
-                        <div class="header-text">
-                            <h2 data-i18n="map-title">Карта мастеров 3D-печати</h2>
-                            <p data-i18n="map-subtitle">Найдите ближайшего специалиста, если у вас нет своего принтера</p>
-                        </div>
-                        <div class="header-actions">
-                            <a href="/masters/join" class="btn-outline" data-i18n="map-join">Стать мастером</a>
-                        </div>
-                    </div>
-                    <div class="map-container-layout">
-                        <div class="map-sidebar">
-                            <div class="location-search">
-                                <div class="search-icon-mini">📍</div>
-                                <input type="text" data-i18n="map-city-placeholder" placeholder="Поиск по городу..." id="map-city-search">
-                            </div>
-                            <div id="masters-list" class="masters-mini-list">
-                                <!-- List of closest masters -->
-                            </div>
-                        </div>
-                        <div class="map-main">
-                            <div id="map"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
 
         <section id="models-section" class="catalog-section">
             <div class="container">
@@ -290,6 +259,7 @@
                         <div class="tab-system">
                             <div class="tabs">
                                 <button class="tab-btn active" data-tab="print" data-i18n="tab-print">Печать</button>
+                                <button class="tab-btn" data-tab="map" data-i18n="tab-map">Мастера</button>
                                 <button class="tab-btn" data-tab="buy" data-i18n="tab-buy">Купить готовую</button>
                                 <button class="tab-btn btn-calc" data-tab="calc" data-i18n="tab-calc">Расчет</button>
                             </div>
@@ -309,7 +279,16 @@
                                         <h4 data-i18n="order-master">Заказать у мастера</h4>
                                         <p id="master-status" data-i18n="order-sub">Найдено 3 мастера рядом</p>
                                     </div>
-                                    <button id="find-master-btn" class="btn-action-alt" data-i18n="order-btn">Найти</button>
+                                    <button onclick="document.querySelector('[data-tab=map]').click()" class="btn-action-alt" data-i18n="order-btn">Найти</button>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-map" style="display:none">
+                                <div class="modal-map-container">
+                                    <div id="map" style="height: 300px; border-radius: 12px; margin-bottom: 12px;"></div>
+                                    <div id="masters-list" class="masters-mini-list" style="max-height: 150px; overflow-y: auto;">
+                                        <!-- List of closest masters -->
+                                    </div>
                                 </div>
                             </div>
 
