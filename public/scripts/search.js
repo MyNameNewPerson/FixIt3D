@@ -45,10 +45,10 @@ function renderResults({ hits, totalPages, currentPage, totalResults }) {
 
     if (!hits || hits.length === 0) {
         grid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 60px 0;">
-                <h3 style="font-size: 24px; margin-bottom: 12px;">${getTranslation('no-results')}</h3>
-                <p style="color: var(--text-muted)">${getTranslation('no-results-sub')}</p>
-                <button id="reset-filters-btn" style="margin-top: 24px; background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">${getTranslation('reset-filters')}</button>
+            <div class="empty-state">
+                <h3>${getTranslation('no-results')}</h3>
+                <p>${getTranslation('no-results-sub')}</p>
+                <button id="reset-filters-btn" class="btn-reset">${getTranslation('reset-filters')}</button>
             </div>
         `;
         document.getElementById('reset-filters-btn')?.addEventListener('click', resetFilters);
