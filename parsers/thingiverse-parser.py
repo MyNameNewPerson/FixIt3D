@@ -165,7 +165,7 @@ def fetch_results(queries, mode, headers):
 
 def parse_thingiverse():
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
-    output_path = 'data/models-index.json'
+    output_path = 'public/data/models-index.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Load existing models to avoid duplicates and implement incremental updates

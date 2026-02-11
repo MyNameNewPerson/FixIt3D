@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   console.log(`[search] Request: mode=${mode}, q=${q}, brand=${brand}, page=${page}`);
 
   try {
-    const dataPath = path.resolve(process.cwd(), 'data', 'models-index.json');
+    const dataPath = path.resolve(process.cwd(), 'public', 'data', 'models-index.json');
     console.log(`[search] Reading data from: ${dataPath}`);
 
     if (!fs.existsSync(dataPath)) {

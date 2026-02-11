@@ -31,12 +31,13 @@ window.openModelModal = function(model) {
     if (model.stl_url) {
         viewer.style.display = 'block';
         fallback.style.display = 'none';
-        viewer.src = model.stl_url;
-        viewer.poster = model.image || fallbackUrl;
+        viewer.setAttribute('src', model.stl_url);
+        viewer.setAttribute('poster', model.image || fallbackUrl);
     } else {
         viewer.style.display = 'none';
         fallback.style.display = 'block';
-        fallback.src = model.image || fallbackUrl;
+        fallback.setAttribute('src', model.image || fallbackUrl);
+        fallback.setAttribute('referrerpolicy', 'no-referrer');
         fallback.onerror = function() { this.src = fallbackUrl; this.onerror = null; };
     }
 

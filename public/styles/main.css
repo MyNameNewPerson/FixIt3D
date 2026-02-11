@@ -44,31 +44,29 @@ a {
 
 /* Header */
 .main-header {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 10px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.main-header:hover {
-    background: rgba(255, 255, 255, 0.85);
+    transition: 0.3s ease;
 }
 
 .header-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 15px;
 }
 
 .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .brand-icon {
@@ -449,20 +447,23 @@ a {
 }
 
 .model-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 24px;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
     transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     position: relative;
 }
 
 .model-card:hover {
     transform: translateY(-12px);
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
-    border-color: var(--primary-light);
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.95);
 }
 
 .card-image {
@@ -918,8 +919,8 @@ body.home-mode {
     .hero-status { margin-left: auto; margin-right: auto; }
     .hero-visual { display: none; }
 
-    .header-center { position: static; transform: none; order: 3; width: 100%; justify-content: center; margin-top: 15px; }
-    .header-container { flex-wrap: wrap; justify-content: space-around; }
+    .header-center { position: static; transform: none; order: 3; width: 100%; justify-content: center; margin-top: 10px; }
+    .header-container { flex-wrap: wrap; justify-content: space-between; }
     .main-nav { display: none; } /* Hide secondary nav on mobile tablets */
 }
 
@@ -928,18 +929,21 @@ body.home-mode {
     .hero-text h1 { font-size: 36px; }
     .catalog-title-area { flex-direction: column; align-items: flex-start; gap: 16px; }
 
-    .modal-grid { grid-template-columns: 1fr; }
-    .modal-card-detail { border-radius: 0; max-height: 100vh; height: 100vh; }
-    .modal-info-column { padding: 30px 20px; }
-    .modal-visual-column { padding: 20px; min-height: 300px; }
+    .modal-grid { grid-template-columns: 1fr; height: auto; overflow-y: visible; }
+    .modal-card-detail { border-radius: 20px; max-height: 95vh; height: auto; width: 95%; overflow-y: auto; }
+    .modal-info-column { padding: 20px; overflow-y: visible; }
+    .modal-visual-column { padding: 15px; min-height: 300px; height: 350px; }
     .viewer-main { min-height: 250px; }
 
-    .header-right { gap: 15px; }
-    .btn-cta { padding: 8px 12px; font-size: 13px; }
-    .brand-name { font-size: 20px; }
+    .header-right { gap: 10px; flex-shrink: 0; }
+    .btn-cta { padding: 8px 10px; font-size: 12px; border-radius: 8px; }
+    .brand-name { font-size: 22px; }
+    .brand-tagline { display: none; }
+    .brand-icon { width: 32px; height: 32px; border-radius: 8px; }
+    .brand-icon svg { width: 18px; height: 18px; }
 
-    .mode-switch { overflow-x: auto; max-width: 100%; }
-    .mode-btn { padding: 8px 16px; font-size: 12px; }
+    .mode-switch { padding: 3px; }
+    .mode-btn { padding: 6px 14px; font-size: 13px; }
 
     .footer-top { grid-template-columns: 1fr; gap: 40px; }
     .footer-links-grid { grid-template-columns: 1fr 1fr; }
