@@ -165,7 +165,7 @@ def fetch_results(queries, mode, headers):
 
 def parse_thingiverse():
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
-    output_path = 'public/data/models-index.json'
+    output_path = 'api/data/models-index.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     # Load existing models to avoid duplicates and implement incremental updates
@@ -201,6 +201,15 @@ def parse_thingiverse():
 
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(models_list, f, ensure_ascii=False, indent=2)
+
+    # Sync with public/data for static serving if needed
+    try:
+        public_path = 'public/data/models-index.json'
+        os.makedirs(os.path.dirname(public_path), exist_ok=True)
+        with open(public_path, 'w', encoding='utf-8') as f:
+            json.dump(models_list, f, ensure_ascii=False, indent=2)
+    except:
+        pass
 
     print(f"Update complete. Added {new_count} new models. Total: {len(models_list)}")
 

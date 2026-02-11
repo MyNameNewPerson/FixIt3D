@@ -20,14 +20,27 @@ export default async function handler(req, res) {
   console.log(`[search] Request: mode=${mode}, q=${q}, brand=${brand}, page=${page}`);
 
   try {
-    const dataPath = path.resolve(process.cwd(), 'public', 'data', 'models-index.json');
-    console.log(`[search] Reading data from: ${dataPath}`);
+    const possiblePaths = [
+      path.join(process.cwd(), 'api', 'data', 'models-index.json'),
+      path.join(process.cwd(), 'public', 'data', 'models-index.json'),
+      path.join(process.cwd(), 'data', 'models-index.json'),
+      path.join('/var/task', 'api', 'data', 'models-index.json')
+    ];
 
-    if (!fs.existsSync(dataPath)) {
-      console.warn(`[search] Index file NOT FOUND at ${dataPath}. Returning empty results.`);
+    let dataPath = null;
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        dataPath = p;
+        break;
+      }
+    }
+
+    if (!dataPath) {
+      console.warn(`[search] Index file NOT FOUND in any expected location. Returning empty results.`);
       return res.status(200).json({ hits: [], totalPages: 0, currentPage: 1, totalResults: 0 });
     }
 
+    console.log(`[search] Reading data from: ${dataPath}`);
     const fileData = fs.readFileSync(dataPath, 'utf8');
     let allHits = [];
     try {
