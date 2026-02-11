@@ -1,0 +1,54 @@
+{
+  "masters": [
+    {
+      "id": 1,
+      "name": "Pro 3D Service Moscow",
+      "city": "Москва",
+      "lat": 55.7558,
+      "lng": 37.6173,
+      "phone": "+7 900 123-45-67",
+      "whatsapp": "+7 900 123-45-67",
+      "equipment": "Prusa i3 MK3S+, Voron 2.4 (ABS, PETG, TPU)"
+    },
+    {
+      "id": 2,
+      "name": "TechPrint Спб",
+      "city": "Санкт-Петербург",
+      "lat": 59.9343,
+      "lng": 30.3351,
+      "phone": "+7 900 765-43-21",
+      "whatsapp": "+7 900 765-43-21",
+      "equipment": "Bambu Lab X1-Carbon, FDM/SLA"
+    },
+    {
+      "id": 3,
+      "name": "Сибирь 3D",
+      "city": "Новосибирск",
+      "lat": 55.0084,
+      "lng": 82.9357,
+      "phone": "+7 900 111-22-33",
+      "whatsapp": "+7 900 111-22-33",
+      "equipment": "Creality Ender 3 S1 Pro (PLA, PETG)"
+    },
+    {
+      "id": 4,
+      "name": "Урал Запчасть 3D",
+      "city": "Екатеринбург",
+      "lat": 56.8389,
+      "lng": 60.6057,
+      "phone": "+7 900 444-55-66",
+      "whatsapp": "+7 900 444-55-66",
+      "equipment": "Picaso Designer XL (Технические пластики)"
+    },
+    {
+      "id": 5,
+      "name": "Казань 3D Центр",
+      "city": "Казань",
+      "lat": 55.7887,
+      "lng": 49.1221,
+      "phone": "+7 900 999-88-77",
+      "whatsapp": "+7 900 999-88-77",
+      "equipment": "Anycubic Photon Mono X (SLA Высокая точность)"
+    }
+  ]
+}

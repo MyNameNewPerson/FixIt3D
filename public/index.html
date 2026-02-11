@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+
+    <!-- SEO Meta Tags -->
+    <title>FixIt3D | База 3D-моделей для ремонта и хобби</title>
+    <meta name="description" content="Найдите 3D-модели редких запчастей для Bosch, Dyson, Samsung и других брендов. Огромный каталог STL файлов для печати и хобби. Закажите печать у мастеров.">
+    <meta name="keywords" content="3D модели запчастей, STL скачать, ремонт бытовой техники 3d печать, шестерни для мясорубки 3d печать, запчасти Bosch 3d печать, FixIt3D">
+    <link rel="canonical" href="https://fixit3d.ru/" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://fixit3d.ru/">
+    <meta property="og:title" content="FixIt3D | Продлите жизнь вашим вещам">
+    <meta property="og:description" content="База 3D-моделей для ремонта техники. Печатайте сами или заказывайте у профессионалов.">
+    <meta property="og:image" content="/images/og-image.jpg">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FixIt3D",
+      "applicationCategory": "Toolbox",
+      "description": "Платформа для поиска 3D-моделей запчастей и мастеров 3D-печати.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "RUB"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": "1250"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://fixit3d.ru/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "FixIt3D",
+      "url": "https://fixit3d.ru",
+      "logo": "https://fixit3d.ru/images/logo.png",
+      "sameAs": [
+        "https://vk.com/fixit3d",
+        "https://t.me/fixit3d"
+      ]
+    }
+    </script>
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/styles/main.css">
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+</head>
+<body class="spare-parts-mode">
+    <header class="main-header">
+        <div class="container header-container">
+            <a href="/" class="brand">
+                <div class="brand-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-name">FixIt3D</span>
+                    <span class="brand-tagline">Repair. Create. Sustain.</span>
+                </div>
+            </a>
+
+            <div class="header-center">
+                <div class="mode-switch" id="mode-switch-ui">
+                    <button class="mode-btn active" data-mode="spare-parts" data-i18n="mode-spare">Запчасти</button>
+                    <button class="mode-btn" data-mode="hobby" data-i18n="mode-hobby">Хобби</button>
+                </div>
+                <nav class="main-nav">
+                    <a href="#models-section" data-i18n="nav-catalog">Каталог</a>
+                    <a href="#map-section" data-i18n="nav-map">Карта мастеров</a>
+                </nav>
+            </div>
+
+            <div class="header-right">
+                <div class="lang-toggle-modern" id="lang-toggle-modern">
+                    <button class="lang-link active" data-lang="ru">RU</button>
+                    <span class="lang-divider">|</span>
+                    <button class="lang-link" data-lang="en">EN</button>
+                </div>
+
+                <a href="/add-model.html" class="btn-cta" data-i18n="nav-add">Добавить модель</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <div class="hero-status">
+                        <span class="dot pulse"></span>
+                        <span id="stats-total" data-i18n="hero-stats">5,241 модель доступна сегодня</span>
+                    </div>
+                    <h1 id="main-title" data-i18n="hero-title">Найдите деталь, которую <span class="text-gradient">нельзя купить</span></h1>
+                    <p id="main-subtitle" data-i18n="hero-subtitle">Крупнейшая база 3D-моделей для ремонта бытовой техники. Скачайте файл и распечатайте деталь за копейки вместо покупки нового устройства.</p>
+
+                    <div class="hero-search">
+                        <div class="search-box">
+                            <div class="search-icon">🔍</div>
+                            <input type="text" id="search-input" data-i18n="hero-search-placeholder" placeholder="Например: шестерня для Bosch Maxx 7">
+                            <button id="search-btn" data-i18n="hero-search-btn">Найти модель</button>
+                        </div>
+                        <div style="display: flex; gap: 12px; margin-top: 8px;">
+                            <button class="btn-secondary" onclick="document.getElementById('map-section').scrollIntoView({behavior:'smooth'})" data-i18n="hero-find-master">Найти мастера</button>
+                        </div>
+                        <div class="search-tags" id="popular-tags">
+                            <span data-i18n="hero-popular">Популярно:</span>
+                            <!-- Tags injected by search.js -->
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="visual-stack">
+                        <div class="v-card card-repair">
+                            <div class="v-icon">🛠️</div>
+                            <div class="v-info">
+                                <b data-i18n="hero-card-repair-title">Ремонт Bosch</b>
+                                <span data-i18n="hero-card-repair-sub">Скидка 80% от цены новой детали</span>
+                            </div>
+                        </div>
+                        <div class="v-card card-hobby">
+                            <div class="v-icon">🎨</div>
+                            <div class="v-info">
+                                <b data-i18n="hero-card-hobby-title">Хобби и Игры</b>
+                                <span data-i18n="hero-card-hobby-sub">Уникальные миниатюры</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hero-blob"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="map-section" class="service-section">
+            <div class="container">
+                <div class="section-card">
+                    <div class="section-header-row">
+                        <div class="header-text">
+                            <h2 data-i18n="map-title">Карта мастеров 3D-печати</h2>
+                            <p data-i18n="map-subtitle">Найдите ближайшего специалиста, если у вас нет своего принтера</p>
+                        </div>
+                        <div class="header-actions">
+                            <a href="/masters/join" class="btn-outline" data-i18n="map-join">Стать мастером</a>
+                        </div>
+                    </div>
+                    <div class="map-container-layout">
+                        <div class="map-sidebar">
+                            <div class="location-search">
+                                <div class="search-icon-mini">📍</div>
+                                <input type="text" data-i18n="map-city-placeholder" placeholder="Поиск по городу..." id="map-city-search">
+                            </div>
+                            <div id="masters-list" class="masters-mini-list">
+                                <!-- List of closest masters -->
+                            </div>
+                        </div>
+                        <div class="map-main">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="models-section" class="catalog-section">
+            <div class="container">
+                <div class="catalog-header">
+                    <div class="catalog-title-area">
+                        <h2 id="catalog-title" data-i18n="catalog-title-spare">Каталог запчастей</h2>
+                        <div class="filter-controls">
+                            <span id="results-count" class="badge-count" data-i18n="results-count">... моделей</span>
+                            <div class="view-toggle">
+                                <button class="view-btn active" title="Сетка">▤</button>
+                                <button class="view-btn" title="Список">☰</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filters-row">
+                        <div class="brand-filters" id="brand-filters">
+                            <!-- Filter chips injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="models-grid" class="models-grid">
+                    <!-- Skeletons will be replaced by search.js -->
+                </div>
+
+                <div id="pagination-container" class="pagination"></div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand-info">
+                    <div class="brand">
+                        <span class="brand-name">FixIt3D</span>
+                    </div>
+                    <p data-i18n="footer-about">Мы строим будущее без свалок. Продлеваем жизнь вещам через доступность технологий 3D-печати.</p>
+                    <div class="social-links">
+                        <a href="#">VK</a>
+                        <a href="#">TG</a>
+                        <a href="#">YT</a>
+                    </div>
+                </div>
+                <div class="footer-links-grid">
+                    <div class="footer-col">
+                        <h4 data-i18n="footer-cat-title">Категории</h4>
+                        <ul id="footer-categories">
+                            <li><a href="#" data-i18n="footer-cat-appliances">Бытовая техника</a></li>
+                            <li><a href="#" data-i18n="footer-cat-electronics">Электроника</a></li>
+                            <li><a href="#" data-i18n="footer-cat-auto">Автотовары</a></li>
+                            <li><a href="#" data-i18n="footer-cat-home">Дом и Сад</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4 data-i18n="footer-about-title">О проекте</h4>
+                        <ul>
+                            <li><a href="#" data-i18n="footer-how">Как это работает</a></li>
+                            <li><a href="/masters/join" data-i18n="footer-for-masters">Для мастеров</a></li>
+                            <li><a href="/legal/dmca.html" data-i18n="footer-dmca">DMCA</a></li>
+                            <li><a href="/legal/privacy.html" data-i18n="footer-privacy">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4 data-i18n="footer-help-title">Помощь</h4>
+                        <ul>
+                            <li><a href="#" data-i18n="footer-faq">FAQ</a></li>
+                            <li><a href="#" data-i18n="footer-feedback">Обратная связь</a></li>
+                            <li><a href="#" data-i18n="footer-donations">Донаты</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-legal-notice" style="max-width: 800px; font-size: 11px; margin-bottom: 20px;">
+                    <p><strong>Disclaimer:</strong> FixIt3D is a search engine for 3D models. We do not manufacture or guarantee the compatibility of any printed parts. Use of 3D-printed parts for critical appliances is at your own risk. 3D-printed parts may not meet original manufacturer safety standards.</p>
+                </div>
+                <p data-i18n="footer-copy">&copy; 2024 FixIt3D Project. Built for a sustainable future.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Model Detail Modal -->
+    <div id="model-modal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content-wrapper">
+            <div class="modal-card-detail">
+                <button class="close-modal-btn close-modal">&times;</button>
+                <div class="modal-grid">
+                    <div class="modal-visual-column">
+                        <div class="viewer-main">
+                            <model-viewer id="modal-viewer" camera-controls auto-rotate shadow-intensity="1" ar touch-action="pan-y"></model-viewer>
+                            <img id="modal-image-fallback" class="fallback-img" referrerpolicy="no-referrer">
+                        </div>
+                        <div class="visual-meta">
+                            <span class="meta-tag">STL Ready</span>
+                            <span class="meta-tag" id="model-license">Free for Personal Use</span>
+                        </div>
+                    </div>
+                    <div class="modal-info-column">
+                        <div class="info-head">
+                            <div class="brand-badge-mini" id="modal-brand">Bosch</div>
+                            <h2 id="modal-title">Деталь для ремонта</h2>
+                            <p class="author"><span data-i18n="modal-author">Автор</span>: <span id="modal-author">Designer</span></p>
+                        </div>
+
+                        <div class="tab-system">
+                            <div class="tabs">
+                                <button class="tab-btn active" data-tab="print" data-i18n="tab-print">Печать</button>
+                                <button class="tab-btn" data-tab="buy" data-i18n="tab-buy">Купить готовую</button>
+                                <button class="tab-btn btn-calc" data-tab="calc" data-i18n="tab-calc">Расчет</button>
+                            </div>
+
+                            <div class="tab-content" id="tab-print">
+                                <div class="action-card primary-action">
+                                    <div class="action-icon">📂</div>
+                                    <div class="action-text">
+                                        <h4 data-i18n="download-stl">Скачать STL файл</h4>
+                                        <p data-i18n="download-sub">Для самостоятельной печати</p>
+                                    </div>
+                                    <button id="download-btn" class="btn-action-main" data-i18n="download-btn">Скачать</button>
+                                </div>
+                                <div class="action-card">
+                                    <div class="action-icon">🧑‍🔧</div>
+                                    <div class="action-text">
+                                        <h4 data-i18n="order-master">Заказать у мастера</h4>
+                                        <p id="master-status" data-i18n="order-sub">Найдено 3 мастера рядом</p>
+                                    </div>
+                                    <button id="find-master-btn" class="btn-action-alt" data-i18n="order-btn">Найти</button>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-buy" style="display:none">
+                                <p class="tab-hint" data-i18n="buy-hint">Если печать невозможна, поищите оригинал или аналог:</p>
+                                <div id="market-links" class="market-list">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-calc" style="display:none">
+                                <div class="calc-widget">
+                                    <div class="calc-row">
+                                        <label data-i18n="calc-plastic">Пластик:</label>
+                                        <select id="calc-mat">
+                                            <option value="1.24" data-i18n="calc-pla">PLA (Декор)</option>
+                                            <option value="1.27" data-i18n="calc-petg">PETG (Прочный)</option>
+                                            <option value="1.04" data-i18n="calc-abs">ABS (Термостойкий)</option>
+                                        </select>
+                                    </div>
+                                    <div class="calc-row">
+                                        <label data-i18n="calc-infill">Заполнение:</label>
+                                        <input type="range" id="calc-inf" min="10" max="100" value="40" step="10">
+                                        <span id="inf-val">40%</span>
+                                    </div>
+                                    <div class="calc-price-area">
+                                        <span data-i18n="calc-estimate">Ориентировочная цена:</span>
+                                        <strong id="calc-result">450 ₽</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer-actions">
+                            <a id="external-link" href="#" target="_blank" class="source-link" data-i18n="source-link">Посмотреть на оригинале ↗</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/scripts/i18n.js"></script>
+    <script type="module" src="/scripts/search.js"></script>
+    <script type="module" src="/scripts/maps.js"></script>
+    <script type="module" src="/scripts/viewer.js"></script>
+</body>
+</html>
