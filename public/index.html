@@ -281,6 +281,14 @@
                                     </div>
                                     <button onclick="document.querySelector('[data-tab=map]').click()" class="btn-action-alt" data-i18n="order-btn">Найти</button>
                                 </div>
+                                <div class="action-card" style="border: 1px dashed var(--accent); background: #fffbeb;">
+                                    <div class="action-icon">🌍</div>
+                                    <div class="action-text">
+                                        <h4>Treatstock Global</h4>
+                                        <p>Печать по всему миру с доставкой</p>
+                                    </div>
+                                    <a id="treatstock-link-print" href="https://www.treatstock.com/my/print-model3d?utm_source=fixit3d" target="_blank" class="btn-action-main" style="background:var(--accent); text-decoration:none; text-align:center;">Заказать</a>
+                                </div>
                             </div>
 
                             <div class="tab-content" id="tab-map" style="display:none">
@@ -288,6 +296,14 @@
                                     <div id="map" style="height: 300px; border-radius: 12px; margin-bottom: 12px;"></div>
                                     <div id="masters-list" class="masters-mini-list" style="max-height: 150px; overflow-y: auto;">
                                         <!-- List of closest masters -->
+                                    </div>
+                                    <div class="action-card" style="margin-top: 12px; border: 1px dashed var(--accent); background: #fffbeb;">
+                                        <div class="action-icon">🌍</div>
+                                        <div class="action-text">
+                                            <h4>Treatstock Global</h4>
+                                            <p>Если нет мастеров рядом</p>
+                                        </div>
+                                        <a id="treatstock-link-map" href="https://www.treatstock.com/my/print-model3d?utm_source=fixit3d" target="_blank" class="btn-action-main" style="background:var(--accent); text-decoration:none; text-align:center;">Заказать</a>
                                     </div>
                                 </div>
                             </div>
@@ -317,6 +333,10 @@
                                     <div class="calc-price-area">
                                         <span data-i18n="calc-estimate">Ориентировочная цена:</span>
                                         <strong id="calc-result">450 ₽</strong>
+                                    </div>
+
+                                    <div id="recommended-materials" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                        <!-- Purchase links for filament -->
                                     </div>
                                 </div>
                             </div>

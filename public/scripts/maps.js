@@ -6,7 +6,9 @@ let mastersData = null;
 export async function initMap() {
     const mapContainer = document.getElementById('map');
     if (!mapContainer || mapInstance) {
-        if (mapInstance) mapInstance.invalidateSize();
+        if (mapInstance) {
+            setTimeout(() => mapInstance.invalidateSize(), 200);
+        }
         return;
     }
 
@@ -107,7 +109,9 @@ export async function initMap() {
         window.addEventListener('resize', () => mapInstance.invalidateSize());
 
         // Initial invalidate
-        setTimeout(() => mapInstance.invalidateSize(), 100);
+        setTimeout(() => {
+            if (mapInstance) mapInstance.invalidateSize();
+        }, 300);
 
     } catch (error) {
         console.error('Map error:', error);
