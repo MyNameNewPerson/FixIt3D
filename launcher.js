@@ -57,17 +57,9 @@ async function start() {
             shell: true
         });
 
-        // 5. Start Job Scheduler (Background)
-        console.log('[INFO] Starting background data parser (job.js)...');
-        const job = spawn('node', ['job.js'], {
-            stdio: 'inherit',
-            shell: true
-        });
-
         server.on('exit', (code) => {
             if (code !== 0 && code !== null) {
                 console.log(`\n[ERROR] Server exited with code ${code}`);
-                job.kill();
                 process.exit(code);
             }
         });

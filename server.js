@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs';
+import { spawn } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +14,7 @@ const port = process.env.PORT || 3000;
 app.use(express.static('public'));
 app.use('/data', express.static('data'));
 
-const ALLOWED_APIS = ['search', 'download', 'track-click', 'get-model'];
+const ALLOWED_APIS = ['search', 'download', 'track-click', 'get-model', 'get-thing-files'];
 
 // API Router
 app.all('/api/:name', async (req, res) => {
@@ -42,10 +43,13 @@ app.all('/api/:name', async (req, res) => {
   }
 });
 
-// Redirect root to index.html (handled by static middleware usually, but for clarity)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Start Background Job
+console.log('[INFO] Starting background job scheduler...');
+spawn('node', ['job.js'], { stdio: 'inherit', shell: true });
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`

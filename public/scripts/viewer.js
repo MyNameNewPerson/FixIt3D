@@ -11,7 +11,7 @@ const findMasterBtn = document.getElementById('find-master-btn');
 
 let currentModel = null;
 
-window.openModelModal = function(model) {
+window.openModelModal = async function(model) {
     if (!model) return;
     currentModel = model;
 
@@ -26,18 +26,38 @@ window.openModelModal = function(model) {
     // Visuals
     const viewer = document.getElementById('modal-viewer');
     const fallback = document.getElementById('modal-image-fallback');
-    
     const fallbackUrl = 'https://via.placeholder.com/800x600?text=Preview+Unavailable';
+
+    // Show initial visual
+    viewer.style.display = 'none';
+    fallback.style.display = 'block';
+    fallback.src = model.image || fallbackUrl;
+    fallback.onerror = function() { this.src = fallbackUrl; this.onerror = null; };
+
+    // Lazy load STL if missing
+    if (!model.stl_url && model.source === 'thingiverse') {
+        const thingId = model.objectID.split('_')[1];
+        try {
+            const res = await fetch(`/api/get-thing-files?id=${thingId}`);
+            const files = await res.json();
+            if (files && files.length > 0) {
+                // Find first STL
+                const stl = files.find(f => f.name.toLowerCase().endsWith('.stl'));
+                if (stl) {
+                    model.stl_url = stl.download_url;
+                }
+            }
+        } catch (e) {
+            console.error('Failed to lazy load STL:', e);
+        }
+    }
+
+    // Update visuals if we have STL now
     if (model.stl_url) {
         viewer.style.display = 'block';
         fallback.style.display = 'none';
         viewer.src = model.stl_url;
         viewer.poster = model.image || fallbackUrl;
-    } else {
-        viewer.style.display = 'none';
-        fallback.style.display = 'block';
-        fallback.src = model.image || fallbackUrl;
-        fallback.onerror = function() { this.src = fallbackUrl; this.onerror = null; };
     }
 
     // Reset Master Status
@@ -50,9 +70,7 @@ window.openModelModal = function(model) {
     externalLink.href = model.source_url;
 
     // Treatstock affiliate link
-    const treatstockLink = `https://www.treatstock.com/my/print-model3d?utm_source=fixit3d&stl_url=${encodeURIComponent(model.stl_url || '')}`;
-    document.getElementById('treatstock-link-print').href = treatstockLink;
-    document.getElementById('treatstock-link-map').href = treatstockLink;
+    updateTreatstockLink(model.stl_url);
 
     // Features
     renderAffiliateLinks(model.name, model.brand);
@@ -62,6 +80,12 @@ window.openModelModal = function(model) {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
 };
+
+function updateTreatstockLink(stlUrl) {
+    const treatstockLink = `https://www.treatstock.com/my/print-model3d?utm_source=fixit3d&stl_url=${encodeURIComponent(stlUrl || '')}`;
+    document.getElementById('treatstock-link-print').href = treatstockLink;
+    document.getElementById('treatstock-link-map').href = treatstockLink;
+}
 
 function closeModal() {
     modal.style.display = 'none';
@@ -164,7 +188,9 @@ async function initCalculator() {
     let filamentData = null;
     try {
         const res = await fetch('/data/filaments.json');
-        filamentData = await res.json();
+        if (res.ok) {
+            filamentData = await res.json();
+        }
     } catch (e) {
         console.warn('Failed to load filaments.json');
     }
