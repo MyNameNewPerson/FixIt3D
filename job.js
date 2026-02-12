@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 
 const execPromise = promisify(exec);
-const INDEX_PATH = path.join('data', 'models-index.json');
+const INDEX_PATH = path.join('public', 'data', 'models-index.json');
 
 if (process.env.VERCEL) {
     console.log('[INFO] Vercel detected. Job scheduler will not run background tasks.');

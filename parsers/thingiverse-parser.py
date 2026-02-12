@@ -5,6 +5,7 @@ import os
 import random
 import sys
 import time
+import re
 
 # --- Credentials ---
 APP_TOKEN = os.environ.get("THINGIVERSE_TOKEN", "53dba3cff3fbbf0506e34d7fa855f40e")
@@ -119,6 +120,19 @@ def fetch_results(queries, mode, headers, existing_ids, max_pages=1, sort='relev
                     if not item.get('preview_image'): continue
                     if is_joke(item['name'], item.get('description'), mode): continue
 
+                    # Strict brand/keyword check for technical modes to avoid false positives (like MightyPi in Audi)
+                    if mode in ['auto', 'home', 'spare-parts'] and category != 'General Parts':
+                        text = (item['name'] + ' ' + (item.get('description') or '')).lower()
+                        brand_key = category.lower()
+                        # Handle common abbreviations
+                        alt_keys = []
+                        if brand_key == 'vw': alt_keys = ['volkswagen']
+
+                        # Use word boundaries to avoid "Audio" matching "Audi"
+                        found = any(re.search(r'\b' + re.escape(k) + r'\b', text) for k in [brand_key] + alt_keys)
+                        if not found:
+                            continue
+
                     brand = None
                     if mode == 'spare-parts' and category != 'General Parts':
                         for b in SPARE_PARTS_QUERIES.keys():
@@ -167,10 +181,10 @@ def parse_thingiverse():
     # - Initial: Relevant sort, multiple pages
     # - Update: Newest sort, stop when existing hit
     sort = 'relevant' if (is_initial or is_full) else 'newest'
-    max_pages = 5 if (is_initial or is_full) else 1
+    max_pages = 15 if (is_initial or is_full) else 1
 
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
-    output_path = 'data/models-index.json'
+    output_path = 'public/data/models-index.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     existing_models = {}

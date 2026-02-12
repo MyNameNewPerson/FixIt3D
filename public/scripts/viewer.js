@@ -208,11 +208,19 @@ async function initCalculator() {
         // Estimation: (Volume * Density) * (Infill % + shell overhead)
         const weight = volume * density * (infill/100 + 0.15);
 
-        // Realistic Cost: (Weight * 25 RUB per gram) + Service Base Fee (300 RUB)
-        const basePrice = Math.max(350, Math.round(weight * 25 + 300));
+        // Realistic Cost: (Weight * 40 RUB per gram) + Service Base Fee (1000 RUB)
+        let basePrice = Math.max(1200, Math.round(weight * 40 + 1000));
         const currency = getTranslation('calc-currency');
 
-        if (resultDiv) resultDiv.textContent = `${basePrice} ${currency}`;
+        // Convert to USD if currency is $ (Approx 1:100 rate)
+        let displayPrice = basePrice;
+        if (currency === '$') {
+            displayPrice = (basePrice / 100).toFixed(2);
+        } else {
+            displayPrice = Math.round(basePrice).toLocaleString();
+        }
+
+        if (resultDiv) resultDiv.textContent = `${displayPrice} ${currency}`;
 
         // Render recommended materials
         if (filamentData && materialsContainer && filamentData[matType]) {

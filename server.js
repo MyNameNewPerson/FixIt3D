@@ -12,7 +12,6 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.static('public'));
-app.use('/data', express.static('data'));
 
 const ALLOWED_APIS = ['search', 'download', 'track-click', 'get-model', 'get-thing-files'];
 
