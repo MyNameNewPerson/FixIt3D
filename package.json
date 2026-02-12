@@ -5,6 +5,7 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "start": "node launcher.js",
     "dev": "node server.js",
     "job": "node job.js",
     "parse": "node job.js --now",

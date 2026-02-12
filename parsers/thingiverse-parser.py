@@ -4,9 +4,9 @@ from datetime import datetime
 import os
 import random
 import sys
+import time
 
 # --- Credentials ---
-# Use environment variable if available, otherwise fallback to hardcoded (for simplicity in this env)
 APP_TOKEN = os.environ.get("THINGIVERSE_TOKEN", "53dba3cff3fbbf0506e34d7fa855f40e")
 THINGIVERSE_API = 'https://api.thingiverse.com'
 
@@ -87,15 +87,15 @@ def estimate_volume(name):
         return round(random.uniform(80, 250), 2)
     return round(random.uniform(15, 60), 2)
 
-def fetch_results(queries, mode, headers, existing_ids, max_pages=1):
+def fetch_results(queries, mode, headers, existing_ids, max_pages=1, sort='relevant'):
     models = {}
     for category, terms in queries.items():
         for term in terms:
-            print(f"[{mode}] Searching '{category}' for: '{term}'...")
+            print(f"[{mode}] Searching '{category}' for: '{term}' (sort={sort})...")
             for page in range(1, max_pages + 1):
-                url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=40&page={page}'
+                url = f'{THINGIVERSE_API}/search/{term}?sort={sort}&per_page=40&page={page}'
                 try:
-                    response = requests.get(url, headers=headers)
+                    response = requests.get(url, headers=headers, timeout=10)
                     response.raise_for_status()
                     data = response.json()
                 except Exception as e:
@@ -105,11 +105,15 @@ def fetch_results(queries, mode, headers, existing_ids, max_pages=1):
                 hits = data.get('hits', [])
                 if not hits: break
 
-                found_new_in_page = False
+                found_new_on_page = False
+                hit_existing = False
                 for item in hits:
                     model_id = f"thingiverse_{item['id']}"
                     
                     if model_id in existing_ids:
+                        if sort == 'newest':
+                            hit_existing = True
+                            # In newest sort, once we hit an existing ID, we can stop this term entirely
                         continue
 
                     if not item.get('preview_image'): continue
@@ -123,7 +127,7 @@ def fetch_results(queries, mode, headers, existing_ids, max_pages=1):
                                 break
                         if not brand: brand = category
 
-                    found_new_in_page = True
+                    found_new_on_page = True
                     models[model_id] = {
                         'objectID': model_id,
                         'name': item['name'],
@@ -138,19 +142,32 @@ def fetch_results(queries, mode, headers, existing_ids, max_pages=1):
                         'image': item['preview_image'],
                         'popularity': item.get('likes_count', 0),
                         'downloads': item.get('download_count', 0),
-                        'stl_url': None,
+                        'stl_url': None, # To be fetched lazily
                         'volume_cm3': estimate_volume(item['name']),
                         'indexed_at': datetime.now().isoformat()
                     }
 
-                if not found_new_in_page and max_pages == 1:
+                if hit_existing and sort == 'newest':
+                    print(f"  - Hit existing model, stopping search for '{term}'")
                     break
+
+                if not found_new_on_page and max_pages == 1:
+                    break
+
+            # Rate limiting friendly delay
+            time.sleep(0.5)
 
     return models
 
 def parse_thingiverse():
     is_full = '--full' in sys.argv
-    max_pages = 3 if is_full else 1
+    is_initial = '--initial' in sys.argv
+
+    # Logic:
+    # - Initial: Relevant sort, multiple pages
+    # - Update: Newest sort, stop when existing hit
+    sort = 'relevant' if (is_initial or is_full) else 'newest'
+    max_pages = 5 if (is_initial or is_full) else 1
 
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
     output_path = 'data/models-index.json'
@@ -176,7 +193,7 @@ def parse_thingiverse():
         (AUTO_QUERIES, 'auto'),
         (HOME_QUERIES, 'home')
     ]:
-        new_items = fetch_results(queries, mode, headers, existing_ids, max_pages=max_pages)
+        new_items = fetch_results(queries, mode, headers, existing_ids, max_pages=max_pages, sort=sort)
         all_new_models.update(new_items)
 
     new_count = 0
@@ -186,6 +203,7 @@ def parse_thingiverse():
             new_count += 1
 
     models_list = list(existing_models.values())
+    # Always keep it sorted by popularity for the main view
     models_list.sort(key=lambda x: x.get('popularity', 0), reverse=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:
