@@ -3,20 +3,17 @@ import json
 from datetime import datetime
 import os
 import random
+import sys
 
-# --- Ваши учетные данные ---
-CLIENT_ID = "715eaf8d906e33fd03a8"
-CLIENT_SECRET = "2ea12c3007691d5e4118e64df9f6814f"
-APP_TOKEN = "53dba3cff3fbbf0506e34d7fa855f40e"
-# -------------------------
-
+# --- Credentials ---
+# Use environment variable if available, otherwise fallback to hardcoded (for simplicity in this env)
+APP_TOKEN = os.environ.get("THINGIVERSE_TOKEN", "53dba3cff3fbbf0506e34d7fa855f40e")
 THINGIVERSE_API = 'https://api.thingiverse.com'
 
 JOKE_KEYWORDS = [
     "joke", "meme", "funny", "gag", "prank", "fake", "parody", "satire", "ironic", "not real", "fake part",
     "keychain", "logo", "decoration", "figurine", "statue", "ornament", "fan art", "toy", "miniature", "sign",
-    "display", "stand", "desktop", "accessory", "charm", "pendant", "wall art", "poster", "non-functional",
-    "figurine", "statue", "toy", "action figure", "decoration"
+    "display", "stand", "desktop", "accessory", "charm", "pendant", "wall art", "poster", "non-functional"
 ]
 
 FUNCTIONAL_KEYWORDS = [
@@ -37,62 +34,49 @@ SPARE_PARTS_QUERIES = {
     'Miele': ['Miele+spare+part', 'Miele+repair'],
     'Xiaomi': ['Xiaomi+spare+part', 'Xiaomi+repair'],
     'Electrolux': ['Electrolux+spare+part', 'Electrolux+repair'],
-    'Indesit': ['Indesit+spare+part', 'Indesit+repair'],
     'Kenwood': ['Kenwood+spare+part', 'Kenwood+repair'],
-    'Moulinex': ['Moulinex+spare+part', 'Moulinex+repair'],
     'KitchenAid': ['KitchenAid+spare+part', 'KitchenAid+repair'],
-    'Bork': ['Bork+spare+part', 'Bork+repair'],
     'DeLonghi': ['DeLonghi+spare+part', 'DeLonghi+repair'],
     'Tefal': ['Tefal+spare+part', 'Tefal+repair'],
-    'Rowenta': ['Rowenta+spare+part', 'Rowenta+repair'],
     'Beko': ['Beko+spare+part', 'Beko+repair'],
-    'General Parts': ['spare+part', 'repair', 'replacement+part', 'fix', 'gears', 'knob', 'button', 'handle', 'bracket']
+    'General Parts': ['spare+part', 'repair', 'replacement+part', 'fix']
 }
 
 HOBBY_QUERIES = {
-    'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain', 'pathfinder'],
-    'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars', 'cosplay', 'mario'],
-    'Toys': ['toy', 'puzzle', 'action+figure', 'lego'],
-    'Decor': ['decoration', 'vase', 'art', 'jewelry', 'sculpture']
+    'Tabletop': ['dnd', 'warhammer', 'miniature', 'terrain'],
+    'Games': ['minecraft', 'pokemon', 'zelda', 'star+wars'],
+    'Toys': ['toy', 'puzzle', 'lego'],
+    'Decor': ['decoration', 'vase', 'art']
 }
 
 AUTO_QUERIES = {
-    'Toyota': ['Toyota+part', 'Toyota+accessory', 'Toyota+repair'],
-    'BMW': ['BMW+part', 'BMW+accessory', 'BMW+repair'],
+    'Toyota': ['Toyota+part', 'Toyota+accessory'],
+    'BMW': ['BMW+part', 'BMW+accessory'],
     'Mercedes': ['Mercedes+part', 'Mercedes+repair'],
     'Audi': ['Audi+part', 'Audi+repair'],
     'Volkswagen': ['VW+part', 'VW+repair'],
     'Tesla': ['Tesla+part', 'Tesla+accessory'],
-    'Accessories': ['car+holder', 'cupholder', 'key+fob', 'clip', 'car+interior']
+    'Accessories': ['car+holder', 'cupholder', 'key+fob']
 }
 
 HOME_QUERIES = {
-    'Makita': ['Makita+spare+part', 'Makita+repair', 'Makita+adapter'],
-    'Karcher': ['Karcher+spare+part', 'Karcher+repair', 'Karcher+nozzle'],
+    'Makita': ['Makita+spare+part', 'Makita+repair'],
+    'Karcher': ['Karcher+spare+part', 'Karcher+repair'],
     'DeWalt': ['DeWalt+part', 'DeWalt+adapter'],
-    'Garden': ['garden+tool', 'hose+connector', 'irrigation'],
-    'Kitchen': ['organizer', 'hook', 'shelf', 'drainer']
+    'Garden': ['garden+tool', 'hose+connector'],
+    'Kitchen': ['organizer', 'hook', 'shelf']
 }
 
 def is_joke(name, description, mode):
     text = (name + " " + (description or "")).lower()
-
-    # Check for joke keywords
     for word in JOKE_KEYWORDS:
         if word in text:
             return True
-    
-    # Mode-specific strict filtering
     if mode == 'spare-parts':
-        # If it contains a major brand name but NO functional keywords, it's likely decoration
         brands = ['bosch', 'dyson', 'samsung', 'lg', 'whirlpool', 'miele', 'ikea', 'kitchenaid']
-        contains_brand = any(b in text for b in brands)
-
-        if contains_brand:
-            has_functional = any(fk in text for fk in FUNCTIONAL_KEYWORDS)
-            if not has_functional:
-                return True # Decoration/Logo/Sign
-
+        if any(b in text for b in brands):
+            if not any(fk in text for fk in FUNCTIONAL_KEYWORDS):
+                return True
     return False
 
 def estimate_volume(name):
@@ -103,12 +87,12 @@ def estimate_volume(name):
         return round(random.uniform(80, 250), 2)
     return round(random.uniform(15, 60), 2)
 
-def fetch_results(queries, mode, headers):
+def fetch_results(queries, mode, headers, existing_ids, max_pages=1):
     models = {}
     for category, terms in queries.items():
         for term in terms:
             print(f"[{mode}] Searching '{category}' for: '{term}'...")
-            for page in range(1, 4):
+            for page in range(1, max_pages + 1):
                 url = f'{THINGIVERSE_API}/search/{term}?sort=relevant&per_page=40&page={page}'
                 try:
                     response = requests.get(url, headers=headers)
@@ -119,56 +103,59 @@ def fetch_results(queries, mode, headers):
                     break
 
                 hits = data.get('hits', [])
-                if not hits:
-                    break
+                if not hits: break
 
+                found_new_in_page = False
                 for item in hits:
-                    if not item.get('preview_image'):
-                        continue
+                    model_id = f"thingiverse_{item['id']}"
                     
-                    if is_joke(item['name'], item.get('description'), mode):
+                    if model_id in existing_ids:
                         continue
+
+                    if not item.get('preview_image'): continue
+                    if is_joke(item['name'], item.get('description'), mode): continue
 
                     brand = None
                     if mode == 'spare-parts' and category != 'General Parts':
-                        # Try to find brand in name, otherwise fallback to category
-                        brand_found = False
                         for b in SPARE_PARTS_QUERIES.keys():
                             if b != 'General Parts' and b.lower() in item['name'].lower():
                                 brand = b
-                                brand_found = True
                                 break
-                        if not brand_found:
-                            brand = category # Fallback
+                        if not brand: brand = category
 
-                    model_id = f"thingiverse_{item['id']}"
-                    if model_id not in models:
-                        models[model_id] = {
-                            'objectID': model_id,
-                            'name': item['name'],
-                            'description': item.get('description', ''),
-                            'brand': brand,
-                            'category': category,
-                            'mode': mode,
-                            'source': 'thingiverse',
-                            'source_url': item['public_url'],
-                            'license': item.get('license'),
-                            'author': item['creator']['name'] if item.get('creator') else 'Unknown',
-                            'image': item['preview_image'],
-                            'popularity': item.get('likes_count', 0),
-                            'downloads': item.get('download_count', 0),
-                            'stl_url': None,
-                            'volume_cm3': estimate_volume(item['name']),
-                            'indexed_at': datetime.now().isoformat()
-                        }
+                    found_new_in_page = True
+                    models[model_id] = {
+                        'objectID': model_id,
+                        'name': item['name'],
+                        'description': item.get('description', ''),
+                        'brand': brand,
+                        'category': category,
+                        'mode': mode,
+                        'source': 'thingiverse',
+                        'source_url': item['public_url'],
+                        'license': item.get('license'),
+                        'author': item['creator']['name'] if item.get('creator') else 'Unknown',
+                        'image': item['preview_image'],
+                        'popularity': item.get('likes_count', 0),
+                        'downloads': item.get('download_count', 0),
+                        'stl_url': None,
+                        'volume_cm3': estimate_volume(item['name']),
+                        'indexed_at': datetime.now().isoformat()
+                    }
+
+                if not found_new_in_page and max_pages == 1:
+                    break
+
     return models
 
 def parse_thingiverse():
+    is_full = '--full' in sys.argv
+    max_pages = 3 if is_full else 1
+
     headers = {'Authorization': f'Bearer {APP_TOKEN}'}
     output_path = 'data/models-index.json'
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Load existing models to avoid duplicates and implement incremental updates
     existing_models = {}
     if os.path.exists(output_path):
         try:
@@ -180,23 +167,25 @@ def parse_thingiverse():
         except Exception as e:
             print(f"Error loading existing models: {e}")
 
-    # Fetch results
-    spare_parts = fetch_results(SPARE_PARTS_QUERIES, 'spare-parts', headers)
-    hobby_parts = fetch_results(HOBBY_QUERIES, 'hobby', headers)
-    auto_parts = fetch_results(AUTO_QUERIES, 'auto', headers)
-    home_parts = fetch_results(HOME_QUERIES, 'home', headers)
+    existing_ids = set(existing_models.keys())
 
-    # Update existing models with new ones
+    all_new_models = {}
+    for queries, mode in [
+        (SPARE_PARTS_QUERIES, 'spare-parts'),
+        (HOBBY_QUERIES, 'hobby'),
+        (AUTO_QUERIES, 'auto'),
+        (HOME_QUERIES, 'home')
+    ]:
+        new_items = fetch_results(queries, mode, headers, existing_ids, max_pages=max_pages)
+        all_new_models.update(new_items)
+
     new_count = 0
-    for category_data in [spare_parts, hobby_parts, auto_parts, home_parts]:
-        for model_id, model_data in category_data.items():
-            if model_id not in existing_models:
-                existing_models[model_id] = model_data
-                new_count += 1
+    for model_id, model_data in all_new_models.items():
+        if model_id not in existing_models:
+            existing_models[model_id] = model_data
+            new_count += 1
 
     models_list = list(existing_models.values())
-
-    # Sort by popularity or date if needed
     models_list.sort(key=lambda x: x.get('popularity', 0), reverse=True)
 
     with open(output_path, 'w', encoding='utf-8') as f:
