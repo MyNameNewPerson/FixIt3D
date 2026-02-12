@@ -47,9 +47,13 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Background Job
-console.log('[INFO] Starting background job scheduler...');
-spawn('node', ['job.js'], { stdio: 'inherit', shell: true });
+// Start Background Job (except on Vercel)
+if (!process.env.VERCEL) {
+  console.log('[INFO] Starting background job scheduler...');
+  spawn('node', ['job.js'], { stdio: 'inherit', shell: true });
+} else {
+  console.log('[INFO] Running on Vercel, skipping background job scheduler.');
+}
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`

@@ -5,6 +5,7 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
+    "build": "if [ \"$THINGIVERSE_TOKEN\" ]; then python3 parsers/thingiverse-parser.py --initial; else echo 'Skipping build-time parse: THINGIVERSE_TOKEN not set'; fi",
     "start": "node launcher.js",
     "dev": "node server.js",
     "job": "node job.js",

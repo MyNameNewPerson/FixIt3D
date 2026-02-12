@@ -24,8 +24,14 @@ export default async function handler(req, res) {
     console.log(`[search] Reading data from: ${dataPath}`);
 
     if (!fs.existsSync(dataPath)) {
-      console.warn(`[search] Index file NOT FOUND at ${dataPath}. Returning empty results.`);
-      return res.status(200).json({ hits: [], totalPages: 0, currentPage: 1, totalResults: 0 });
+      console.error(`[ERROR] Search index NOT FOUND at: ${dataPath}. Make sure the parser has run and data/models-index.json exists.`);
+      return res.status(200).json({
+        hits: [],
+        totalPages: 0,
+        currentPage: 1,
+        totalResults: 0,
+        warning: 'Data index not found. If this is a new deployment, please wait for the first crawl.'
+      });
     }
 
     const fileData = fs.readFileSync(dataPath, 'utf8');
