@@ -11,17 +11,23 @@ async function runParser(mode = '') {
     console.log(`[${new Date().toISOString()}] Starting Thingiverse Parser (${mode})...`);
     try {
         const flag = mode === 'initial' ? '--initial' : '';
-        const { stdout, stderr } = await execPromise(`python3 parsers/thingiverse-parser.py ${flag}`);
+        // Prefer Node.js parser
+        const { stdout, stderr } = await execPromise(`node parsers/thingiverse-parser.js ${flag}`);
         if (stdout) console.log(stdout);
         if (stderr) console.error(stderr);
         console.log(`[${new Date().toISOString()}] Parser finished successfully.`);
     } catch (error) {
-        console.error(`[${new Date().toISOString()}] Parser failed:`, error);
+        console.error(`[${new Date().toISOString()}] Parser failed: ${error.message}`);
     }
 }
 
-// Check if index exists or is empty, run if needed
 async function checkAndRunInitial() {
+    // Skip if running on Vercel
+    if (process.env.VERCEL) {
+        console.log('[job] Running on Vercel, skipping background scheduler.');
+        return;
+    }
+
     let shouldRun = false;
     let mode = 'update';
 
@@ -31,7 +37,7 @@ async function checkAndRunInitial() {
         mode = 'initial';
     } else {
         const stats = fs.statSync(INDEX_PATH);
-        if (stats.size < 500) { // Nearly empty
+        if (stats.size < 500) {
             console.log('Model index seems empty, triggering initial parse...');
             shouldRun = true;
             mode = 'initial';
@@ -50,8 +56,9 @@ async function checkAndRunInitial() {
 
 checkAndRunInitial();
 
-// Every 12 hours
-const INTERVAL = 12 * 60 * 60 * 1000;
-setInterval(() => runParser('update'), INTERVAL);
-
-console.log(`FixIt3D Job Scheduler started. Parser will run updates every 12 hours.`);
+// Only set interval if not on Vercel
+if (!process.env.VERCEL) {
+    const INTERVAL = 12 * 60 * 60 * 1000;
+    setInterval(() => runParser('update'), INTERVAL);
+    console.log(`FixIt3D Job Scheduler started. Updates every 12 hours.`);
+}
