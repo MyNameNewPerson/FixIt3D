@@ -928,11 +928,32 @@ body.home-mode {
     .hero-text h1 { font-size: 36px; }
     .catalog-title-area { flex-direction: column; align-items: flex-start; gap: 16px; }
 
-    .modal-grid { grid-template-columns: 1fr; }
-    .modal-card-detail { border-radius: 0; max-height: 100vh; height: 100vh; }
-    .modal-info-column { padding: 30px 20px; }
-    .modal-visual-column { padding: 20px; min-height: 300px; }
-    .viewer-main { min-height: 250px; }
+    .modal-card-detail {
+        border-radius: 0;
+        max-height: 100vh;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-grid {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+        grid-template-columns: 1fr;
+    }
+    .modal-visual-column {
+        padding: 20px;
+        height: 35vh;
+        min-height: 250px;
+        flex-shrink: 0;
+    }
+    .modal-info-column {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 20px;
+    }
+    .viewer-main { height: 100%; min-height: 0; }
 
     .header-right { gap: 15px; }
     .btn-cta { padding: 8px 12px; font-size: 13px; }

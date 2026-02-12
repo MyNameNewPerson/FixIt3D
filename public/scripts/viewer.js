@@ -49,8 +49,13 @@ window.openModelModal = function(model) {
     // External Links
     externalLink.href = model.source_url;
 
+    // Treatstock affiliate link
+    const treatstockLink = `https://www.treatstock.com/my/print-model3d?utm_source=fixit3d&stl_url=${encodeURIComponent(model.stl_url || '')}`;
+    document.getElementById('treatstock-link-print').href = treatstockLink;
+    document.getElementById('treatstock-link-map').href = treatstockLink;
+
     // Features
-    renderAffiliateLinks(model.name);
+    renderAffiliateLinks(model.name, model.brand);
     initCalculator();
 
     // Show Modal
@@ -102,18 +107,35 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
-function renderAffiliateLinks(name) {
+function cleanModelName(name) {
+    if (!name) return '';
+    return name
+        .replace(/\.stl$/i, '')
+        .replace(/\.obj$/i, '')
+        .replace(/\.step$/i, '')
+        .replace(/_/g, ' ')
+        .replace(/-/g, ' ')
+        .replace(/v\d+(\.\d+)?/gi, '') // Remove v1, v1.2 etc
+        .replace(/\(\d+\)/g, '')       // Remove (1), (2) etc
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function renderAffiliateLinks(name, brand) {
     const container = document.getElementById('market-links');
     if (!container) return;
     
+    const cleanName = cleanModelName(name);
+    const searchTerm = brand ? `${brand} ${cleanName}` : cleanName;
+    const q = encodeURIComponent(searchTerm);
+
     // Check if part is printable or likely needs buying
     const nonPrintableKeywords = ['spring', 'motor', 'engine', 'logic board', 'display', 'glass', 'пружина', 'мотор', 'плата', 'стекло', 'металл', 'metal', 'screw', 'bolt'];
-    const isLikelyHardware = nonPrintableKeywords.some(k => name.toLowerCase().includes(k));
+    const isLikelyHardware = nonPrintableKeywords.some(k => searchTerm.toLowerCase().includes(k));
 
-    const q = encodeURIComponent(name);
     const platforms = [
         { name: 'Amazon', url: `https://www.amazon.com/s?k=${q}&tag=fixit3d-21`, icon: '🛒' },
-        { name: 'AliExpress', url: `https://www.aliexpress.com/wholesale?SearchText=${q}`, icon: '📦' },
+        { name: 'AliExpress', url: `https://www.aliexpress.com/w/wholesale-${q.replace(/%20/g, '-')}.html`, icon: '📦' },
         { name: 'Yandex Market', url: `https://yandex.ru/products/search?text=${q}`, icon: '🇷🇺' },
         { name: 'Ozon', url: `https://www.ozon.ru/search/?text=${q}`, icon: '🔵' }
     ];
@@ -129,13 +151,23 @@ function renderAffiliateLinks(name) {
     `).join('');
 }
 
-function initCalculator() {
+async function initCalculator() {
     const matSelect = document.getElementById('calc-mat');
     const infInput = document.getElementById('calc-inf');
     const infVal = document.getElementById('inf-val');
     const resultDiv = document.getElementById('calc-result');
+    const materialsContainer = document.getElementById('recommended-materials');
     
     if (!matSelect || !infInput) return;
+
+    // Load materials data
+    let filamentData = null;
+    try {
+        const res = await fetch('/data/filaments.json');
+        filamentData = await res.json();
+    } catch (e) {
+        console.warn('Failed to load filaments.json');
+    }
 
     // Density values: PLA ~1.24, PETG ~1.27, ABS ~1.04
     const volume = currentModel.volume_cm3 || 35;
@@ -143,15 +175,36 @@ function initCalculator() {
     const update = () => {
         const density = parseFloat(matSelect.value);
         const infill = parseInt(infInput.value);
+        const matType = matSelect.options[matSelect.selectedIndex].text.split(' ')[0]; // Extract PLA, PETG, ABS
+
         if (infVal) infVal.textContent = `${infill}%`;
 
         // Estimation: (Volume * Density) * (Infill % + shell overhead)
         const weight = volume * density * (infill/100 + 0.15);
-        // Cost: ~25 RUB per gram (includes work/energy/amortization)
-        const basePrice = Math.max(350, Math.round(weight * 25));
+
+        // Realistic Cost: (Weight * 25 RUB per gram) + Service Base Fee (300 RUB)
+        const basePrice = Math.max(350, Math.round(weight * 25 + 300));
         const currency = getTranslation('calc-currency');
 
         if (resultDiv) resultDiv.textContent = `${basePrice} ${currency}`;
+
+        // Render recommended materials
+        if (filamentData && materialsContainer && filamentData[matType]) {
+            materialsContainer.innerHTML = `
+                <p style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">🛒 Купить материал для печати:</p>
+                <div class="market-list">
+                    ${filamentData[matType].map(f => `
+                        <a href="${f.link}" target="_blank" class="market-btn">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span>📦</span>
+                                <span>${f.name} (${f.shop})</span>
+                            </div>
+                            <span class="price-hint">Купить ↗</span>
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+        }
     };
 
     matSelect.onchange = update;
