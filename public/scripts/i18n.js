@@ -95,7 +95,8 @@ const translations = {
         "footer-privacy": "Конфиденциальность",
         "footer-faq": "FAQ",
         "footer-feedback": "Обратная связь",
-        "footer-donations": "Донаты"
+        "footer-donations": "Поддержать проект",
+        "featured": "Рекомендуем"
     },
     en: {
         "nav-catalog": "Catalog",
@@ -191,7 +192,8 @@ const translations = {
         "footer-privacy": "Privacy Policy",
         "footer-faq": "FAQ",
         "footer-feedback": "Feedback",
-        "footer-donations": "Donations"
+        "footer-donations": "Support Us",
+        "featured": "Featured"
     }
 };
 

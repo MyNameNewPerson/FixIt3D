@@ -13,13 +13,21 @@ if (process.env.VERCEL) {
 }
 
 async function runParser(mode = '') {
-    console.log(`[${new Date().toISOString()}] Starting Thingiverse Parser (${mode})...`);
+    console.log(`[${new Date().toISOString()}] Starting Parsers (${mode})...`);
     try {
         const flag = mode === 'initial' ? '--initial' : '';
-        const { stdout, stderr } = await execPromise(`python3 parsers/thingiverse-parser.py ${flag}`);
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
-        console.log(`[${new Date().toISOString()}] Parser finished successfully.`);
+
+        // Thingiverse
+        console.log('Running Thingiverse Parser...');
+        const thingRes = await execPromise(`python3 parsers/thingiverse-parser.py ${flag}`);
+        if (thingRes.stdout) console.log(thingRes.stdout);
+
+        // Printables
+        console.log('Running Printables Parser...');
+        const printRes = await execPromise(`python3 parsers/printables-parser.py`);
+        if (printRes.stdout) console.log(printRes.stdout);
+
+        console.log(`[${new Date().toISOString()}] All parsers finished successfully.`);
     } catch (error) {
         console.error(`[${new Date().toISOString()}] Parser failed:`, error);
     }
