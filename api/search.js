@@ -1,6 +1,7 @@
 // api/search.js
 import fs from 'fs';
 import path from 'path';
+import { supabase } from '../lib/supabase.js';
 
 const BLACKLIST_WORDS = [
   'joke', 'meme', 'funny', 'gag', 'prank', 'fake', 'parody', 'shit', 'dumb', 'stupid',
@@ -19,18 +20,78 @@ export default async function handler(req, res) {
 
   console.log(`[search] Request: mode=${mode}, q=${q}, brand=${brand}, page=${page}`);
 
+  // 1. Try Supabase Search First
+  if (process.env.SUPABASE_URL) {
+    try {
+      let query = supabase.from('models').select('*', { count: 'exact' });
+
+      // Mode filter
+      if (mode) query = query.eq('mode', mode);
+
+      // Brand filter
+      if (brand) query = query.ilike('brand', brand);
+
+      // Text search
+      if (q) {
+        // Simple ILIKE search across title, description, brand
+        query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,brand.ilike.%${q}%`);
+      }
+
+      // Pagination
+      const from = (page - 1) * per_page;
+      const to = from + per_page - 1;
+      query = query.range(from, to).order('created_at', { ascending: false });
+
+      const { data, count, error } = await query;
+
+      if (!error && data && data.length > 0) {
+        const hits = data.map(m => ({
+          id: m.id,
+          name: m.title, // Map DB title to frontend name
+          description: m.description,
+          image: m.image_url, // Map DB image_url to frontend image
+          link: m.url,
+          source: m.source,
+          price: m.price,
+          author: m.author,
+          brand: m.brand,
+          mode: m.mode,
+          source_url: m.url,
+          objectID: m.id // for compatibility
+        }));
+
+        return res.status(200).json({
+          hits,
+          totalPages: Math.ceil(count / per_page),
+          currentPage: parseInt(page),
+          totalResults: count
+        });
+      }
+
+      if (error) {
+        console.warn('[Supabase] Search error (falling back to local):', error.message);
+      } else {
+        console.log('[Supabase] No results found, falling back to local file.');
+      }
+    } catch (dbErr) {
+      console.error('[Supabase] Unexpected error:', dbErr);
+    }
+  }
+
+  // 2. Fallback to Local JSON (original logic)
   try {
     const dataPath = path.resolve(process.cwd(), 'data', 'models-index.json');
     console.log(`[search] Reading data from: ${dataPath}`);
 
     if (!fs.existsSync(dataPath)) {
-      console.error(`[ERROR] Search index NOT FOUND at: ${dataPath}. Make sure the parser has run and data/models-index.json exists.`);
+      // If no DB results AND no local file, return empty with warning
+      console.error(`[ERROR] Search index NOT FOUND at: ${dataPath}.`);
       return res.status(200).json({
         hits: [],
         totalPages: 0,
         currentPage: 1,
         totalResults: 0,
-        warning: 'Data index not found. If this is a new deployment, please wait for the first crawl.'
+        warning: 'Data index not found. Please populate Supabase or run parsers.'
       });
     }
 
