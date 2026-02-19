@@ -1,5 +1,6 @@
 import express from 'express';
 import { supabase } from '../lib/supabase.js';
+import { supabaseAdmin } from '../lib/supabase-admin.js';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { invalidateConfig } from '../lib/config.js';
@@ -85,12 +86,12 @@ app.post('/api/admin/config', verifySupabaseAuth, async (req, res) => {
   if (!key || !value) return res.status(400).json({ error: 'Key and Value are required' });
 
   try {
-    const { error } = await supabase.from('app_config').upsert({ key, value, updated_at: new Date() });
+    const { error } = await supabaseAdmin.from('app_config').upsert({ key, value, updated_at: new Date() });
     if (error) throw error;
 
     invalidateConfig();
 
-    await supabase.from('admin_logs').insert({
+    await supabaseAdmin.from('admin_logs').insert({
       action: 'UPDATE_CONFIG',
       details: { key, value },
       ip: req.ip || req.socket.remoteAddress
@@ -109,14 +110,14 @@ app.post('/api/admin/masters/verify', verifySupabaseAuth, async (req, res) => {
   if (!id) return res.status(400).json({ error: 'ID required' });
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('masters')
       .update({ is_premium: !!is_premium, verified: true })
       .eq('id', id);
 
     if (error) throw error;
 
-    await supabase.from('admin_logs').insert({
+    await supabaseAdmin.from('admin_logs').insert({
       action: 'VERIFY_MASTER',
       details: { id, is_premium },
       ip: req.ip
