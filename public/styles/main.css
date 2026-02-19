@@ -166,10 +166,10 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 }
 .models-grid.list-view .model-card {
     flex-direction: row;
-    height: 200px;
+    height: 220px;
 }
 .models-grid.list-view .card-image {
-    width: 260px;
+    width: 280px;
     height: 100%;
     flex-shrink: 0;
 }
@@ -180,30 +180,33 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 .models-grid.list-view .card-body h3 {
     font-size: 20px;
     -webkit-line-clamp: 1;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 .models-grid.list-view .card-author {
     margin-bottom: auto;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .models-grid.list-view .model-card {
         flex-direction: column;
         height: auto;
     }
     .models-grid.list-view .card-image {
         width: 100%;
-        height: 240px;
+        height: 200px;
     }
 }
 
-/* Pagination (Restored) */
+/* Pagination */
 .pagination, .pagination-container {
     display: flex;
+    flex-direction: row; /* Explicitly set row */
     justify-content: center;
+    align-items: center;
     gap: 8px;
     margin-top: 40px;
     flex-wrap: wrap;
+    width: 100%;
 }
 .page-btn {
     width: 40px;
@@ -266,8 +269,9 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 .fallback-img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Beautiful placement */
-    padding: 40px; /* Inner padding for fallback image */
+    object-fit: contain;
+    padding: 0; /* Removed padding to maximize size */
+    background: #f8fafc;
 }
 .modal-info-column { padding: 40px 32px; overflow-y: auto; background: white; }
 
@@ -412,20 +416,22 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #FFDD00; /* BMC color */
-    color: #000000 !important;
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-weight: 700;
+    background: transparent;
+    color: #94a3b8 !important; /* Muted text color */
+    padding: 8px 0;
+    border-radius: 0;
+    font-weight: 500;
     font-size: 14px;
     margin-top: 16px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: 0.2s;
     text-decoration: none;
+    border-bottom: 1px solid transparent;
 }
 .donate-link:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 221, 0, 0.4);
-    background: #ffe64a;
+    color: white !important;
+    border-color: var(--primary);
+    transform: none;
+    box-shadow: none;
 }
 
 .social-links { display: flex; gap: 12px; margin-top: 24px; }

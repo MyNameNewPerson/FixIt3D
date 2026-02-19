@@ -262,15 +262,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelsGrid = document.getElementById('models-grid');
 
     if (viewBtns.length > 0 && modelsGrid) {
-        viewBtns.forEach((btn, index) => {
-            btn.addEventListener('click', () => {
+        viewBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget;
                 viewBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+                target.classList.add('active');
 
-                if (index === 0) { // Grid
-                    modelsGrid.classList.remove('list-view');
-                } else { // List
+                // Robust check based on title or icon content
+                const isList = target.title === 'Список' || target.textContent.includes('☰');
+
+                if (isList) {
                     modelsGrid.classList.add('list-view');
+                } else {
+                    modelsGrid.classList.remove('list-view');
                 }
             });
         });
