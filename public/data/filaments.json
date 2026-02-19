@@ -1,0 +1,17 @@
+{
+  "PLA": [
+    { "name": "PLA (Ozon)", "shop": "Ozon", "link": "https://www.ozon.ru/category/plastik-dlya-3d-printera-pla/" },
+    { "name": "PLA (WB)", "shop": "Wildberries", "link": "https://www.wildberries.ru/catalog/0/search.aspx?search=pla%20plastic" },
+    { "name": "PLA (AliExpress)", "shop": "AliExpress", "link": "https://www.aliexpress.com/w/wholesale-pla-filament.html" }
+  ],
+  "PETG": [
+    { "name": "PETG (Ozon)", "shop": "Ozon", "link": "https://www.ozon.ru/category/plastik-dlya-3d-printera-petg/" },
+    { "name": "PETG (WB)", "shop": "Wildberries", "link": "https://www.wildberries.ru/catalog/0/search.aspx?search=petg%20plastic" },
+    { "name": "PETG (AliExpress)", "shop": "AliExpress", "link": "https://www.aliexpress.com/w/wholesale-petg-filament.html" }
+  ],
+  "ABS": [
+    { "name": "ABS (Ozon)", "shop": "Ozon", "link": "https://www.ozon.ru/category/plastik-dlya-3d-printera-abs/" },
+    { "name": "ABS (WB)", "shop": "Wildberries", "link": "https://www.wildberries.ru/catalog/0/search.aspx?search=abs%20plastic" },
+    { "name": "ABS (AliExpress)", "shop": "AliExpress", "link": "https://www.aliexpress.com/w/wholesale-abs-filament.html" }
+  ]
+}
