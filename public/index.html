@@ -264,6 +264,7 @@
                             <div class="tabs">
                                 <button class="tab-btn active" data-tab="print" data-i18n="tab-print">Печать</button>
                                 <button class="tab-btn" data-tab="map" data-i18n="tab-map">Мастера</button>
+                                <button class="tab-btn" data-tab="calc" data-i18n="tab-calc">Расчет</button>
                                 <button class="tab-btn" data-tab="buy" data-i18n="tab-buy">Купить готовую</button>
                             </div>
 
@@ -277,8 +278,18 @@
                                     <button id="download-btn" class="btn-action-main" data-i18n="download-btn">Скачать</button>
                                 </div>
 
-                                <!-- Calculator Block (Merged) -->
-                                <div class="calc-widget" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+                                <div class="action-card secondary-action" style="margin-top: 12px; border: 1px dashed var(--accent); background: #fffbeb;">
+                                    <div class="action-icon">🌍</div>
+                                    <div class="action-text">
+                                        <h4>Treatstock Global</h4>
+                                        <p>Заказать печать с доставкой</p>
+                                    </div>
+                                    <a id="treatstock-link-print" href="#" target="_blank" class="btn-action-main" style="background:var(--accent); color:white; text-decoration:none; text-align:center; padding: 8px 16px; border-radius: 8px; font-weight: 600;">Заказать</a>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-calc" style="display:none">
+                                <div class="calc-widget">
                                     <h4 style="margin-bottom: 16px; font-size: 16px;">Калькулятор стоимости печати</h4>
                                     <div class="calc-row">
                                         <label data-i18n="calc-plastic">Пластик:</label>
@@ -299,7 +310,12 @@
                                     </div>
 
                                     <div id="recommended-materials" style="margin-top: 24px;">
-                                        <!-- Purchase links for filament -->
+                                        <!-- Purchase links for filament will be injected here -->
+                                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                                            <a href="https://www.wildberries.ru/catalog/0/search.aspx?search=pla+plastic" target="_blank" class="market-btn-mini" style="background: #cb11ab; color: white;">WB</a>
+                                            <a href="https://www.ozon.ru/search/?text=pla+plastic" target="_blank" class="market-btn-mini" style="background: #005bff; color: white;">Ozon</a>
+                                            <a href="https://aliexpress.ru/wholesale?SearchText=pla+filament" target="_blank" class="market-btn-mini" style="background: #ff4747; color: white;">AliExpress</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
