@@ -10,10 +10,14 @@
     "dev": "node server.js",
     "job": "node job.js",
     "parse": "node job.js --now",
+    "parse:mmf": "node parsers/myminifactory.js",
+    "populate:masters": "node scripts/fetch_masters.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "algoliasearch": "^4.22.1",
+    "dotenv": "^17.3.1",
     "express": "^4.18.2",
     "jszip": "^3.10.1",
     "node-fetch": "^3.3.2",
