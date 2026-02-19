@@ -6,13 +6,15 @@
     <title>FixIt3D Admin</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div id="login-screen" class="screen active">
         <div class="login-card">
             <h2>Admin Login</h2>
             <form id="login-form">
-                <input type="password" id="password" placeholder="Enter Admin Password" required>
+                <input type="email" id="email" placeholder="Admin Email" required value="admin@fixit3d.com">
+                <input type="password" id="password" placeholder="Admin Password" required>
                 <button type="submit">Unlock Dashboard</button>
             </form>
         </div>
