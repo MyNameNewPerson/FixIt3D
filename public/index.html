@@ -265,7 +265,6 @@
                                 <button class="tab-btn active" data-tab="print" data-i18n="tab-print">Печать</button>
                                 <button class="tab-btn" data-tab="map" data-i18n="tab-map">Мастера</button>
                                 <button class="tab-btn" data-tab="buy" data-i18n="tab-buy">Купить готовую</button>
-                                <button class="tab-btn btn-calc" data-tab="calc" data-i18n="tab-calc">Расчет</button>
                             </div>
 
                             <div class="tab-content" id="tab-print">
@@ -277,42 +276,10 @@
                                     </div>
                                     <button id="download-btn" class="btn-action-main" data-i18n="download-btn">Скачать</button>
                                 </div>
-                                <div class="action-card">
-                                    <div class="action-icon">🧑‍🔧</div>
-                                    <div class="action-text">
-                                        <h4 data-i18n="order-master">Заказать у мастера</h4>
-                                        <p id="master-status" data-i18n="order-sub">Найдено 3 мастера рядом</p>
-                                    </div>
-                                    <button onclick="document.querySelector('[data-tab=map]').click()" class="btn-action-alt" data-i18n="order-btn">Найти</button>
-                                </div>
-                            </div>
 
-                            <div class="tab-content" id="tab-map" style="display:none">
-                                <div class="modal-map-container">
-                                    <div id="map" style="height: 300px; border-radius: 12px; margin-bottom: 12px;"></div>
-                                    <div id="masters-list" class="masters-mini-list" style="max-height: 150px; overflow-y: auto;">
-                                        <!-- List of closest masters -->
-                                    </div>
-                                    <div class="action-card" style="margin-top: 12px; border: 1px dashed var(--accent); background: #fffbeb;">
-                                        <div class="action-icon">🌍</div>
-                                        <div class="action-text">
-                                            <h4>Treatstock Global</h4>
-                                            <p>Если нет мастеров рядом</p>
-                                        </div>
-                                        <a id="treatstock-link-map" href="https://www.treatstock.com/my/print-model3d?utm_source=fixit3d" target="_blank" class="btn-action-main" style="background:var(--accent); text-decoration:none; text-align:center;">Заказать</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-content" id="tab-buy" style="display:none">
-                                <p class="tab-hint" data-i18n="buy-hint">Если печать невозможна, поищите оригинал или аналог:</p>
-                                <div id="market-links" class="market-list">
-                                    <!-- Populated by JS -->
-                                </div>
-                            </div>
-
-                            <div class="tab-content" id="tab-calc" style="display:none">
-                                <div class="calc-widget">
+                                <!-- Calculator Block (Merged) -->
+                                <div class="calc-widget" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+                                    <h4 style="margin-bottom: 16px; font-size: 16px;">Калькулятор стоимости печати</h4>
                                     <div class="calc-row">
                                         <label data-i18n="calc-plastic">Пластик:</label>
                                         <select id="calc-mat">
@@ -331,9 +298,43 @@
                                         <strong id="calc-result">450 ₽</strong>
                                     </div>
 
-                                    <div id="recommended-materials" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                    <div id="recommended-materials" style="margin-top: 24px;">
                                         <!-- Purchase links for filament -->
                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-map" style="display:none">
+                                <div class="modal-map-container">
+                                    <!-- Order from Master moved here -->
+                                    <div class="action-card">
+                                        <div class="action-icon">🧑‍🔧</div>
+                                        <div class="action-text">
+                                            <h4 data-i18n="order-master">Заказать у мастера</h4>
+                                            <p id="master-status" data-i18n="order-sub">Найдено 3 мастера рядом</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="map" style="height: 300px; border-radius: 12px; margin-bottom: 12px;"></div>
+                                    <div id="masters-list" class="masters-mini-list" style="max-height: 150px; overflow-y: auto;">
+                                        <!-- List of closest masters -->
+                                    </div>
+
+                                    <div class="action-card" style="margin-top: 12px; border: 1px dashed var(--accent); background: #fffbeb;">
+                                        <div class="action-icon">🌍</div>
+                                        <div class="action-text">
+                                            <h4>Treatstock Global</h4>
+                                            <p>Если нет мастеров рядом</p>
+                                        </div>
+                                        <a id="treatstock-link-map" href="https://www.treatstock.com/my/print-model3d?utm_source=fixit3d" target="_blank" class="btn-action-main" style="background:var(--accent); text-decoration:none; text-align:center;">Заказать</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-content" id="tab-buy" style="display:none">
+                                <p class="tab-hint" data-i18n="buy-hint">Если печать невозможна, поищите оригинал или аналог:</p>
+                                <div id="market-links" class="market-list">
+                                    <!-- Populated by JS -->
                                 </div>
                             </div>
                         </div>
