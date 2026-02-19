@@ -31,8 +31,19 @@ window.openModelModal = async function(model) {
     // Show initial visual
     viewer.style.display = 'none';
     fallback.style.display = 'block';
-    fallback.src = model.image || fallbackUrl;
-    fallback.onerror = function() { this.src = fallbackUrl; this.onerror = null; };
+
+    if (model.image) {
+        fallback.src = model.image;
+    } else {
+        fallback.src = fallbackUrl;
+    }
+
+    fallback.onerror = function() {
+        if (this.src !== fallbackUrl) {
+            this.src = fallbackUrl;
+        }
+        this.onerror = null;
+    };
 
     // Lazy load STL if missing
     if (!model.stl_url && model.source === 'thingiverse') {
@@ -128,10 +139,32 @@ window.addEventListener('click', (e) => {
 });
 
 if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
+    downloadBtn.addEventListener('click', async () => {
         if (!currentModel) return;
         fetch(`/api/track-click?modelId=${currentModel.objectID}&type=download`);
-        window.open(currentModel.source_url, '_blank');
+
+        if (currentModel.stl_url) {
+            window.location.href = currentModel.stl_url;
+        } else {
+            // Try fetch if missing
+            if (currentModel.source === 'thingiverse') {
+                const thingId = currentModel.objectID.split('_')[1];
+                try {
+                    const res = await fetch(`/api/get-thing-files?id=${thingId}`);
+                    const files = await res.json();
+                    if (files && files.length > 0) {
+                        const stl = files.find(f => f.name.toLowerCase().endsWith('.stl'));
+                        if (stl) {
+                            window.location.href = stl.download_url;
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Download fetch failed', e);
+                }
+            }
+            window.open(currentModel.source_url, '_blank');
+        }
     });
 }
 
@@ -301,24 +334,28 @@ async function initCalculator() {
                     <a href="${f.link}" target="_blank" class="market-btn">
                         <div style="display:flex; align-items:center; gap:8px;">
                             <span>📦</span>
-                            <span>${f.name} (${f.shop})</span>
+                            <span>${f.name}</span>
                         </div>
                         <span class="price-hint">Купить ↗</span>
                     </a>
                 `).join('');
             }
 
-            materialsContainer.innerHTML = `
-                ${specificFilaments ? `<p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Рекомендуемые катушки:</p>
-                <div class="market-list" style="margin-bottom: 16px;">${specificFilaments}</div>` : ''}
-
-                <p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Найти ${matType} на маркетплейсах:</p>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <a href="https://www.wildberries.ru/catalog/0/search.aspx?search=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #cb11ab; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">WB</a>
-                    <a href="https://www.ozon.ru/search/?text=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #005bff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">Ozon</a>
-                    <a href="https://aliexpress.ru/wholesale?SearchText=${matType}+filament" target="_blank" class="market-btn-mini" style="background: #ff4747; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">AliExpress</a>
-                </div>
-            `;
+            if (specificFilaments) {
+                materialsContainer.innerHTML = `
+                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Рекомендуемые катушки:</p>
+                    <div class="market-list" style="margin-bottom: 16px;">${specificFilaments}</div>
+                `;
+            } else {
+                materialsContainer.innerHTML = `
+                    <p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Найти ${matType} на маркетплейсах:</p>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <a href="https://www.wildberries.ru/catalog/0/search.aspx?search=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #cb11ab; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">WB</a>
+                        <a href="https://www.ozon.ru/search/?text=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #005bff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">Ozon</a>
+                        <a href="https://aliexpress.ru/wholesale?SearchText=${matType}+filament" target="_blank" class="market-btn-mini" style="background: #ff4747; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">AliExpress</a>
+                    </div>
+                `;
+            }
         }
     };
 
