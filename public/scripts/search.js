@@ -257,6 +257,25 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => switchMode(btn.dataset.mode));
     });
 
+    // View Toggle
+    const viewBtns = document.querySelectorAll('.view-btn');
+    const modelsGrid = document.getElementById('models-grid');
+
+    if (viewBtns.length > 0 && modelsGrid) {
+        viewBtns.forEach((btn, index) => {
+            btn.addEventListener('click', () => {
+                viewBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                if (index === 0) { // Grid
+                    modelsGrid.classList.remove('list-view');
+                } else { // List
+                    modelsGrid.classList.add('list-view');
+                }
+            });
+        });
+    }
+
     // Tag clicks
     document.querySelectorAll('.search-tag').forEach(tag => {
         tag.addEventListener('click', (e) => {
