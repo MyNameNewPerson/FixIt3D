@@ -79,6 +79,14 @@ window.openModelModal = async function(model) {
     // Show Modal
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+
+    // Bottom Sheet Logic for Mobile
+    if (window.innerWidth <= 768) {
+        modal.classList.add('active'); // Trigger slide-up
+    }
+
+    // History API (Block 5)
+    history.pushState({ modal: true, modelId: model.objectID }, '', '#model-' + model.objectID);
 };
 
 function updateTreatstockLink(stlUrl) {
@@ -89,12 +97,29 @@ function updateTreatstockLink(stlUrl) {
 
 function closeModal() {
     modal.style.display = 'none';
+    modal.classList.remove('active');
     document.body.style.overflow = 'auto';
+
+    // Clean up history if needed (only if current state is modal)
+    if (history.state && history.state.modal) {
+        history.back();
+    }
 }
+
+// Handle Back Button
+window.onpopstate = function(event) {
+    if (!event.state || !event.state.modal) {
+        // Just close visually without calling history.back() again
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+};
 
 if (closeBtn) closeBtn.addEventListener('click', closeModal);
 window.addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal-content-wrapper')) {
+    // Backdrop click
+    if (e.target.classList.contains('modal-backdrop')) {
         closeModal();
     }
 });
@@ -164,7 +189,7 @@ function renderAffiliateLinks(name, brand) {
         { name: 'Ozon', url: `https://www.ozon.ru/search/?text=${q}`, icon: '🔵' }
     ];
 
-    container.innerHTML = platforms.map(p => `
+    let buttonsHtml = platforms.map(p => `
         <a href="${p.url}" target="_blank" class="market-btn ${isLikelyHardware ? 'highlight-buy' : ''}">
             <div style="display:flex; align-items:center; gap:10px;">
                 <span style="font-size:20px;">${p.icon}</span>
@@ -173,6 +198,48 @@ function renderAffiliateLinks(name, brand) {
             <span class="price-hint">${isLikelyHardware ? getTranslation('buy-original') : getTranslation('check-price')} ↗</span>
         </a>
     `).join('');
+
+    // --- Contextual CPA Integration (Block 4) ---
+    // Analyze model name/tags to suggest specific parts via /api/go
+    const keywords = [
+        { key: 'gear', target: 'filament_nylon', label: 'Купить Nylon (для шестеренок)' },
+        { key: 'wheel', target: 'filament_tpu', label: 'Купить TPU (для колес)' },
+        { key: 'bearing', target: 'bearing_608', label: 'Купить подшипники 608ZZ' },
+        { key: 'screw', target: 'screws_m3', label: 'Купить набор винтов M3' },
+        { key: 'bolt', target: 'screws_m3', label: 'Купить крепеж' },
+        { key: 'led', target: 'led_strip', label: 'Купить LED ленту' },
+        { key: 'lamp', target: 'led_strip', label: 'Купить подсветку' },
+        { key: 'arduino', target: 'arduino', label: 'Купить Arduino' },
+        { key: 'motor', target: 'servo', label: 'Купить сервопривод' }
+    ];
+
+    const contextBtns = [];
+    const lowerName = (name + ' ' + (brand || '')).toLowerCase();
+
+    keywords.forEach(kw => {
+        if (lowerName.includes(kw.key)) {
+            contextBtns.push(`
+                <a href="/api/go?target=${kw.target}" target="_blank" class="market-btn recommended-part" style="border: 2px solid var(--primary); background: rgba(var(--primary-rgb), 0.1);">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:20px;">💡</span>
+                        <span style="font-weight:700; color:var(--primary);">${kw.label}</span>
+                    </div>
+                    <span class="price-hint">FixIt3D Choice ↗</span>
+                </a>
+            `);
+        }
+    });
+
+    if (contextBtns.length > 0) {
+        buttonsHtml += `
+            <div style="width:100%; margin-top:12px; margin-bottom:8px; font-size:12px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;">
+                Рекомендуемые компоненты
+            </div>
+            ${contextBtns.join('')}
+        `;
+    }
+
+    container.innerHTML = buttonsHtml;
 }
 
 async function initCalculator() {

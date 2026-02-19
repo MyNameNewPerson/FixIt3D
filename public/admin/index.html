@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixIt3D Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="login-screen" class="screen active">
+        <div class="login-card">
+            <h2>Admin Login</h2>
+            <form id="login-form">
+                <input type="password" id="password" placeholder="Enter Admin Password" required>
+                <button type="submit">Unlock Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="screen">
+        <header class="admin-header">
+            <div class="logo">FixIt3D Admin</div>
+            <nav>
+                <button onclick="showSection('stats')" class="nav-btn active">Stats</button>
+                <button onclick="showSection('config')" class="nav-btn">Config</button>
+                <button onclick="showSection('masters')" class="nav-btn">Masters</button>
+                <button onclick="logout()" class="nav-btn danger">Logout</button>
+            </nav>
+        </header>
+
+        <main class="content">
+            <!-- Stats Section -->
+            <section id="section-stats" class="section active">
+                <h3>Dashboard Overview</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Masters</h4>
+                        <div class="value" id="stat-masters">Loading...</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Premium Masters</h4>
+                        <div class="value" id="stat-premium">Loading...</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Master Balances</h4>
+                        <div class="value" id="stat-balance">Loading...</div>
+                    </div>
+                </div>
+
+                <h3>Daily Metrics</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Visits</th>
+                            <th>Leads</th>
+                            <th>Affiliate Clicks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-stats-body">
+                        <tr><td colspan="4">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Config Section -->
+            <section id="section-config" class="section">
+                <h3>Affiliate Links & Settings</h3>
+                <div id="config-list"></div>
+            </section>
+
+            <!-- Masters Section -->
+            <section id="section-masters" class="section">
+                <h3>Master Management</h3>
+                <div class="tools-bar">
+                    <input type="text" placeholder="Search Master ID..." id="master-search">
+                    <button onclick="lookupMaster()">Search</button>
+                </div>
+                <div id="master-detail"></div>
+            </section>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
