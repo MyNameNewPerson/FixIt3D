@@ -33,8 +33,11 @@ export default async function handler(req, res) {
 
       // Text search
       if (q) {
-        // Simple ILIKE search across title, description, brand
-        query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,brand.ilike.%${q}%`);
+        // Sanitize input to prevent injection in .or() filter
+        const safeQ = q.replace(/[,()]/g, ' ').trim();
+        if (safeQ) {
+            query = query.or(`title.ilike.%${safeQ}%,description.ilike.%${safeQ}%,brand.ilike.%${safeQ}%`);
+        }
       }
 
       // Pagination

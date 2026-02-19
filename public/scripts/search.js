@@ -14,7 +14,8 @@ const HOME_BRANDS = ['Makita', 'Karcher', 'DeWalt', 'Garden', 'Kitchen'];
 async function searchModels(query = '', brand = '', page = 1) {
     const grid = document.getElementById('models-grid');
     if (!grid) return;
-    grid.innerHTML = '<div class="card-skeleton"></div>'.repeat(8);
+    // Inject Masonry Skeletons (Block 5)
+    grid.innerHTML = '<div class="card-skeleton"></div>'.repeat(12);
 
     currentQuery = query;
     currentBrand = brand;
