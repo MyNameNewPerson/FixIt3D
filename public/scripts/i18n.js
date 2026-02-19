@@ -95,7 +95,7 @@ const translations = {
         "footer-privacy": "Конфиденциальность",
         "footer-faq": "FAQ",
         "footer-feedback": "Обратная связь",
-        "footer-donations": "Поддержать проект",
+        "footer-donations": "Поддержать нас",
         "featured": "Рекомендуем"
     },
     en: {

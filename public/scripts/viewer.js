@@ -282,9 +282,9 @@ async function initCalculator() {
         let basePrice = Math.max(350, Math.round(weight * 25 + 300));
         const currency = getTranslation('calc-currency');
 
-        // Currency Conversion (Approximate 90 RUB = 1 USD)
+        // Currency Conversion (Approximate 96 RUB = 1 USD)
         if (currency === '$') {
-            basePrice = Math.round(basePrice / 90);
+            basePrice = Math.round(basePrice / 96);
         }
 
         if (resultDiv) {
@@ -294,19 +294,29 @@ async function initCalculator() {
         }
 
         // Render recommended materials
-        if (filamentData && materialsContainer && filamentData[matType]) {
+        if (materialsContainer) {
+            let specificFilaments = '';
+            if (filamentData && filamentData[matType]) {
+                specificFilaments = filamentData[matType].map(f => `
+                    <a href="${f.link}" target="_blank" class="market-btn">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span>📦</span>
+                            <span>${f.name} (${f.shop})</span>
+                        </div>
+                        <span class="price-hint">Купить ↗</span>
+                    </a>
+                `).join('');
+            }
+
             materialsContainer.innerHTML = `
-                <p style="font-size: 13px; font-weight: 700; margin-bottom: 12px;">🛒 Купить материал для печати:</p>
-                <div class="market-list">
-                    ${filamentData[matType].map(f => `
-                        <a href="${f.link}" target="_blank" class="market-btn">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span>📦</span>
-                                <span>${f.name} (${f.shop})</span>
-                            </div>
-                            <span class="price-hint">Купить ↗</span>
-                        </a>
-                    `).join('')}
+                ${specificFilaments ? `<p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Рекомендуемые катушки:</p>
+                <div class="market-list" style="margin-bottom: 16px;">${specificFilaments}</div>` : ''}
+
+                <p style="font-size: 13px; font-weight: 700; margin-bottom: 8px;">Найти ${matType} на маркетплейсах:</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a href="https://www.wildberries.ru/catalog/0/search.aspx?search=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #cb11ab; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">WB</a>
+                    <a href="https://www.ozon.ru/search/?text=${matType}+plastic" target="_blank" class="market-btn-mini" style="background: #005bff; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">Ozon</a>
+                    <a href="https://aliexpress.ru/wholesale?SearchText=${matType}+filament" target="_blank" class="market-btn-mini" style="background: #ff4747; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600;">AliExpress</a>
                 </div>
             `;
         }
