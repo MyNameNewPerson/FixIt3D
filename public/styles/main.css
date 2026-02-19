@@ -52,6 +52,29 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 
 /* Catalog & Grid */
 .catalog-section { padding: 80px 0; }
+.brand-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0 24px 0;
+}
+.brand-filters .filter-chip {
+    padding: 6px 16px;
+    border-radius: 20px;
+    background: white;
+    border: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.brand-filters .filter-chip:hover, .brand-filters .filter-chip.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
 /* Reverting to standard Grid layout for stability based on user feedback */
 .models-grid {
     display: grid;
