@@ -14,10 +14,10 @@ const port = process.env.PORT || 3000;
 app.use(express.static('public'));
 app.use('/data', express.static('data'));
 
-const ALLOWED_APIS = ['search', 'download', 'track-click', 'get-model', 'get-thing-files'];
+const ALLOWED_APIS = ['search', 'download', 'track-click', 'get-model', 'get-thing-files', 'admin'];
 
 // API Router
-app.all('/api/:name', async (req, res) => {
+app.all('/api/:name*', async (req, res) => {
   const apiName = req.params.name;
   
   if (!ALLOWED_APIS.includes(apiName)) {

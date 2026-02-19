@@ -91,8 +91,11 @@ window.openModelModal = async function(model) {
 
 function updateTreatstockLink(stlUrl) {
     const treatstockLink = `https://www.treatstock.com/my/print-model3d?utm_source=fixit3d&stl_url=${encodeURIComponent(stlUrl || '')}`;
-    document.getElementById('treatstock-link-print').href = treatstockLink;
-    document.getElementById('treatstock-link-map').href = treatstockLink;
+    const printLink = document.getElementById('treatstock-link-print');
+    const mapLink = document.getElementById('treatstock-link-map');
+
+    if (printLink) printLink.href = treatstockLink;
+    if (mapLink) mapLink.href = treatstockLink;
 }
 
 function closeModal() {
