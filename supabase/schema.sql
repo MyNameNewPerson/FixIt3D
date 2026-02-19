@@ -51,6 +51,9 @@ ALTER TABLE masters ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public models are viewable by everyone" ON models
   FOR SELECT USING (true);
 
--- Policy: Everyone can read masters (public listing)
-CREATE POLICY "Public masters are viewable by everyone" ON masters
-  FOR SELECT USING (true);
+-- Policy: Masters are ONLY viewable by Service Role (via our backend API)
+-- We remove the "public" policy and only allow service role.
+-- If frontend tries to query directly, it will fail (returning 0 rows).
+-- The API uses the SERVICE_ROLE_KEY to bypass RLS and filter data securely.
+CREATE POLICY "Service Role full access masters" ON masters
+  FOR ALL USING (auth.role() = 'service_role');

@@ -64,17 +64,40 @@ export async function initMap() {
                 item.className = 'master-item-mini';
                 if (isPremium) item.style.borderLeft = '4px solid gold';
 
-                item.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <h4 style="${isPremium ? 'color:var(--primary); font-weight:800;' : ''}">
-                                ${master.name} ${isPremium ? '⭐' : ''}
-                            </h4>
-                            <p>${master.address || master.city || 'Адрес скрыт'}</p>
-                        </div>
-                        <button class="btn-action-main" style="padding:4px 8px; font-size:10px;">На карте</button>
-                    </div>
-                `;
+                const nameText = isPremium ? `${master.name} ⭐` : master.name;
+                const addrText = master.address || master.city || 'Адрес скрыт';
+
+                // Prevent XSS by building DOM nodes instead of innerHTML for user content
+                const contentDiv = document.createElement('div');
+                contentDiv.style.display = 'flex';
+                contentDiv.style.justifyContent = 'space-between';
+                contentDiv.style.alignItems = 'center';
+
+                const infoDiv = document.createElement('div');
+
+                const h4 = document.createElement('h4');
+                h4.textContent = nameText;
+                if (isPremium) {
+                    h4.style.color = 'var(--primary)';
+                    h4.style.fontWeight = '800';
+                }
+
+                const p = document.createElement('p');
+                p.textContent = addrText;
+
+                infoDiv.appendChild(h4);
+                infoDiv.appendChild(p);
+
+                const btn = document.createElement('button');
+                btn.className = 'btn-action-main';
+                btn.style.padding = '4px 8px';
+                btn.style.fontSize = '10px';
+                btn.textContent = 'На карте';
+
+                contentDiv.appendChild(infoDiv);
+                contentDiv.appendChild(btn);
+                item.appendChild(contentDiv);
+
                 item.onclick = () => {
                     mapInstance.setView([master.lat, master.lng], 14);
                     const m = markers.find(m => m.masterId === master.id);
