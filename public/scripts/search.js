@@ -136,7 +136,19 @@ function renderPagination(totalPages, currentPage) {
 function updateBrandFilters() {
     const container = document.getElementById('brand-filters');
     if (!container) return;
-    container.innerHTML = `<button class="filter-chip active" data-brand="">${getTranslation('all-brands')}</button>`;
+
+    container.innerHTML = '';
+
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-chip active';
+    allBtn.setAttribute('data-brand', '');
+    allBtn.textContent = getTranslation('all-brands');
+    allBtn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        allBtn.classList.add('active');
+        searchModels(currentQuery, '');
+    });
+    container.appendChild(allBtn);
     
     let brands = [];
     if (currentMode === 'spare-parts') brands = SPARE_PARTS_BRANDS;

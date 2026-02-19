@@ -243,7 +243,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 .close-modal-btn { position: absolute; top: 24px; right: 24px; width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--bg-main); font-size: 24px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
 .close-modal-btn:hover { background: #e2e8f0; transform: rotate(90deg); }
 
-.modal-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; height: 100%; } /* More space for image */
+.modal-grid { display: grid; grid-template-columns: 1fr 1fr; height: 100%; } /* Balanced layout */
 .modal-visual-column {
     background: #f8fafc;
     padding: 0; /* Remove padding to fill space */
@@ -273,7 +273,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     padding: 0; /* Removed padding to maximize size */
     background: #f8fafc;
 }
-.modal-info-column { padding: 40px 32px; overflow-y: auto; background: white; }
+.modal-info-column { padding: 32px 24px; overflow-y: auto; background: white; }
 
 .visual-meta {
     position: absolute;
@@ -339,7 +339,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     font-size: 10px; font-weight: 800; text-transform: uppercase; margin-left: 8px; display: inline-block;
 }
 
-.market-btn { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: white; border: 1px solid var(--border); border-radius: 12px; font-weight: 600; transition: 0.2s; margin-bottom: 8px; text-decoration: none; color: inherit; }
+.market-btn { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background: white; border: 1px solid var(--border); border-radius: 12px; font-weight: 600; transition: 0.2s; margin-bottom: 8px; text-decoration: none; color: inherit; white-space: normal; word-break: break-word; }
 .market-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-2px); }
 .market-btn.highlight-buy { border: 2px solid var(--accent); background: #fffbeb; }
 .price-hint { font-size: 12px; color: var(--text-muted); font-weight: 500; }
@@ -380,7 +380,7 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
 
     /* Adjust inner layout for mobile */
     .modal-grid { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-    .modal-visual-column { height: 35vh; min-height: 250px; flex-shrink: 0; padding: 0; }
+    .modal-visual-column { height: 30vh; min-height: 250px; flex-shrink: 0; padding: 0; }
     .modal-info-column { flex: 1; overflow-y: auto; padding: 24px 20px; }
     .close-modal-btn { top: 16px; right: 16px; width: 32px; height: 32px; font-size: 18px; z-index: 20; background: rgba(255,255,255,0.8); }
 }
