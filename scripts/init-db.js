@@ -2,21 +2,31 @@ import pg from 'pg';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const { Client } = pg;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Connection details - US East 1 Pooler
-const CONNECTION_STRING = 'postgres://postgres.ggrdkycsnxirzcuuxlea:Valusha19923003@aws-0-us-east-1.pooler.supabase.com:5432/postgres';
+// Connection details - Use environment variable
+const CONNECTION_STRING = process.env.DATABASE_URL;
 
 async function setupDatabase() {
+  if (!CONNECTION_STRING) {
+    console.error('Error: DATABASE_URL environment variable is not set.');
+    console.error('Please add DATABASE_URL=postgres://... to your .env file.');
+    process.exit(1);
+  }
+
   const client = new Client({
     connectionString: CONNECTION_STRING,
     ssl: { rejectUnauthorized: false } // Required for Supabase
   });
 
   try {
-    console.log('Connecting to Supabase (US East 1 Pooler)...');
+    console.log('Connecting to Supabase...');
     await client.connect();
     console.log('Connected.');
 
