@@ -528,3 +528,25 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     .pagination-container { gap: 4px; }
     .page-btn { width: 32px; height: 32px; font-size: 12px; border-radius: 8px; }
 }
+@media (max-width: 480px) {
+    /* Full width grid for small screens */
+    .models-grid {
+        grid-template-columns: 1fr;
+    }
+    .model-card {
+        border-radius: 16px;
+    }
+    .card-image {
+        height: 240px;
+    }
+
+    .pagination-container { gap: 4px; }
+    .page-btn { width: 32px; height: 32px; font-size: 12px; border-radius: 8px; }
+
+    /* Header Compact Fix */
+    .brand-name { font-size: 20px; }
+    .brand-tagline { display: none; } /* Hide tagline to save space */
+    .header-right { gap: 8px; }
+    .btn-cta { padding: 8px 12px; font-size: 13px; }
+    .lang-toggle-modern { font-size: 13px; }
+}

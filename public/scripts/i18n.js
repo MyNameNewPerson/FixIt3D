@@ -83,6 +83,8 @@ const translations = {
         "map-subtitle": "Найдите ближайшего специалиста, если у вас нет своего принтера",
         "map-join": "Стать мастером",
         "map-city-placeholder": "Ваш город...",
+        "show-map": "Показать карту",
+        "hide-map": "Скрыть карту",
 
         // Footer Cats
         "footer-cat-appliances": "Бытовая техника",
@@ -180,6 +182,8 @@ const translations = {
         "map-subtitle": "Find a local specialist if you don't have your own printer",
         "map-join": "Join as Master",
         "map-city-placeholder": "Your city...",
+        "show-map": "Show Map",
+        "hide-map": "Hide Map",
 
         // Footer Cats
         "footer-cat-appliances": "Appliances",

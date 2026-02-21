@@ -187,8 +187,31 @@ function switchTab(tabId) {
     });
 
     if (tabId === 'map') {
-        initMap();
+        // initMap(); // Handled by button now
+        // If map is already visible, make sure it's sized right
+        const mapDiv = document.getElementById('map');
+        if (mapDiv && mapDiv.style.display !== 'none') {
+            initMap();
+        }
     }
+}
+
+const toggleMapBtn = document.getElementById('toggle-map-btn');
+if (toggleMapBtn) {
+    toggleMapBtn.addEventListener('click', () => {
+        const mapDiv = document.getElementById('map');
+        if (!mapDiv) return;
+
+        const isHidden = mapDiv.style.display === 'none';
+        if (isHidden) {
+            mapDiv.style.display = 'block';
+            toggleMapBtn.innerHTML = `🗺️ ${getTranslation('hide-map')}`;
+            initMap();
+        } else {
+            mapDiv.style.display = 'none';
+            toggleMapBtn.innerHTML = `🗺️ ${getTranslation('show-map')}`;
+        }
+    });
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
