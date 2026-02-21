@@ -549,4 +549,56 @@ a { text-decoration: none; color: inherit; transition: 0.2s; }
     .header-right { gap: 8px; }
     .btn-cta { padding: 8px 12px; font-size: 13px; }
     .lang-toggle-modern { font-size: 13px; }
+
+    /* Hero Section Mobile Fixes */
+    .hero-text h1 {
+        font-size: 32px; /* Drastically reduce from 64px */
+        line-height: 1.2;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+        text-align: center;
+        padding: 0 16px; /* Ensure padding from edges */
+    }
+    .hero-text p {
+        font-size: 16px;
+        text-align: center;
+        margin-bottom: 32px;
+        padding: 0 16px;
+    }
+    .hero-status {
+        justify-content: center; /* Center the status badge */
+        display: flex;
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    /* Stack search box vertically on very small screens if needed,
+       but primarily ensure it fits horizontally first */
+    .search-box {
+        flex-direction: column; /* Stack input and button */
+        gap: 12px;
+        background: transparent; /* Remove container bg if any */
+        padding: 0;
+    }
+    .search-box input {
+        width: 100%;
+        text-align: center;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 14px;
+    }
+    .search-box button {
+        width: 100%;
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 12px;
+    }
+    .hero-search {
+        background: rgba(255,255,255,0.5); /* Light backing for contrast */
+        backdrop-filter: blur(8px);
+        padding: 16px;
+        border-radius: 20px;
+        margin: 0 16px; /* Spacing from screen edges */
+    }
 }
