@@ -97,7 +97,10 @@ window.openModelModal = async function(model) {
     }
 
     // History API (Block 5)
-    history.pushState({ modal: true, modelId: model.objectID }, '', '#model-' + model.objectID);
+    // Only push state if we aren't already there (to avoid duplicates if user clicks multiple times)
+    if (!history.state || !history.state.modal) {
+        history.pushState({ modal: true, modelId: model.objectID }, '', '#model-' + model.objectID);
+    }
 };
 
 function updateTreatstockLink(stlUrl) {
